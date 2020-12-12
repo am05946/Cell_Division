@@ -8,6 +8,12 @@ let Cell_Division = {
     init: function () {
         let player = document.createElement("div")
         var circle1 = {radius: 20, x: 5, y: 5};
+
+        movePlayer.onkeydown = function (event) {
+            if (event.keycode == 88) {
+                console.log("X key pressed");
+            }  
+        }
     },
 
     startAnimation: function () {
@@ -17,6 +23,7 @@ let Cell_Division = {
     animateGame: function () {
         this.moveWanderers();
         this.renderWanderers();
+        this.movePlayer();
     },
 
     moveWanderers: function () {
@@ -27,6 +34,6 @@ let Cell_Division = {
             } else if (this.circles[i].x_pos < 0) {
             }
         }
-    }
+    },
 
 }
