@@ -8,22 +8,24 @@ let Cell_Division = {
     init: function () {
         let player = document.createElement("div")
         var circle1 = {radius: 20, x: 5, y: 5};
-
-        movePlayer.onkeydown = function (event) {
-            if (event.keycode == 88) {
-                console.log("X key pressed");
-            }  
-        }
+        this.startAnimation();
+        console.log("started animation");
     },
 
     startAnimation: function () {
-        this.animation1 = window.setInterval(this.animateCircles.bind(Cell_Division), 20);
+        this.animation1 = window.setInterval(this.animateGame.bind(Cell_Division), 20);
     },
 
     animateGame: function () {
         this.moveWanderers();
         this.renderWanderers();
         this.movePlayer();
+        console.log("animate");
+        movePlayer.onkeydown = function (event) {
+            if (event.keycode == 88) {
+                console.log("X key pressed");
+            }  
+        }
     },
 
     moveWanderers: function () {
