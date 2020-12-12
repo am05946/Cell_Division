@@ -8,9 +8,9 @@
     background: gray;
 }
 
-.circle {
-    cx: 20px;
-    cy: 20px;
+.player {
+    height: 25px;
+    WIDTH: 25px;
     background-color: rgba(0,128,0,0.5);
     border: 1px solid black;
     position: absolute;
