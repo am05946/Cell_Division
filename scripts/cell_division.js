@@ -6,6 +6,7 @@ let Cell_Division = {
     spitters: [],
 
     init: function () {
+        console.log("animate");
         let player = document.createElement("div")
         var circle1 = {radius: 20, x: 5, y: 5};
         this.startAnimation();
@@ -20,11 +21,15 @@ let Cell_Division = {
         this.moveWanderers();
         this.renderWanderers();
         this.movePlayer();
-        console.log("animate");
-        movePlayer.onkeydown = function (event) {
-            if (event.keycode == 88) {
-                console.log("X key pressed");
-            }  
+    },
+
+    renderWanderers: function () {
+
+    },
+
+    player.onkeydown: function (event) {
+        if (event.keycode == 88) {
+            console.log("X key pressed");
         }
     },
 
@@ -39,3 +44,5 @@ let Cell_Division = {
     },
 
 }
+
+Cell_Division.init();
