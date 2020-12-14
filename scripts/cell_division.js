@@ -4,13 +4,43 @@ let Cell_Division = {
     wanderers: [],
     chasers: [],
     spitters: [],
+    playerY: 500,
+    playerX: 250,
+    inertiaX: 0,
+    inertiaY: 0,
 
     init: function () {
         console.log("animate");
         let player = document.createElement("div")
-        var circle1 = {radius: 20, x: 5, y: 5};
+        var circle1 = { radius: 20, x: 5, y: 5 };
         this.startAnimation();
         console.log("started animation");
+
+        window.onkeydown = function (event) {
+            if (event.keyCode == 77) { //W
+                if (inertiaY > -5) {
+                    inertiaY -= 1;
+                }
+            }
+            if (event.keyCode == 97) { //A
+                if (inertiaX > -5) {
+                    inertiaX -= 1;
+                }
+
+            }
+            if (event.keyCode == 115) { //S
+                if (inertiaY < 5) {
+                    inertiaY += 1;
+                }
+
+            }
+            if (event.keyCode == 100) { //D
+                if (inertiaX < 5) {
+                    inertiaX += 1;
+                }
+
+            }
+        }
     },
 
     startAnimation: function () {
@@ -21,16 +51,20 @@ let Cell_Division = {
         this.moveWanderers();
         this.renderWanderers();
         this.movePlayer();
+        this.renderPlayer();
     },
 
     renderWanderers: function () {
 
     },
 
-    player.onkeydown: function (event) {
-        if (event.keycode == 88) {
-            console.log("X key pressed");
-        }
+    movePlayer: function () {
+    playerY += this.inertiaY;
+    playerX += this.inertiaX;
+    },
+
+    renderPlayer: function () {
+    
     },
 
     moveWanderers: function () {
