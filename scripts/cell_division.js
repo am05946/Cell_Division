@@ -8,9 +8,9 @@ let Cell_Division = {
     playerX: 250,
     inertiaX: 0,
     inertiaY: 0,
+    mass: 0,
 
     init: function () {
-        console.log("animate");
         let player = document.createElement("div")
         var circle1 = { radius: 20, x: 5, y: 5 };
         this.startAnimation();
@@ -40,6 +40,9 @@ let Cell_Division = {
                 }
 
             }
+            console.log(this.inertiaX);
+            console.log(this.inertiaY);
+            console.log("Hello");
         }
     },
 
@@ -66,7 +69,9 @@ let Cell_Division = {
     },
 
     renderPlayer: function () {
-    
+        this.player.element.style.top = this.playerX + "px";
+        this.player.element.style.left = this.playerY + "px";
+        this.player.element.style.height = (this.mass + 5) + "px";
     },
 
     moveWanderers: function () {
