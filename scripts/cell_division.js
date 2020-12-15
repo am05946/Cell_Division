@@ -59,8 +59,10 @@ let Cell_Division = {
     },
 
     movePlayer: function () {
-    playerY += this.inertiaY;
-    playerX += this.inertiaX;
+    this.playerY += this.inertiaY;
+    this.playerX += this.inertiaX;
+    console.log(this.inertiaX);
+    console.log(this.inertiaY);
     },
 
     renderPlayer: function () {
