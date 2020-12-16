@@ -4,47 +4,63 @@ let Cell_Division = {
     wanderers: [],
     chasers: [],
     spitters: [],
-    playerY: 500,
-    playerX: 250,
-    inertiaX: 0,
-    inertiaY: 0,
-    mass: 0,
+    container: document.getElementById("playing_screen"),
+    player: undefined,
 
     init: function () {
-        let player = document.createElement("div")
-        var circle1 = { radius: 20, x: 5, y: 5 };
+        this.player = this.createPlayer();
+        window.onkeydown = function (event) {
+            if (event.keyCode == 87) { //W
+                if (this.player.inertiaY > -5) {
+                    this.player.inertiaY -= 1;
+                }
+            }
+            if (event.keyCode == 65) { //A
+                if (this.player.inertiaX > -5) {
+                    this.player.inertiaX -= 1;
+                }
+
+            }
+            if (event.keyCode == 83) { //S
+                if (this.player.inertiaY < 5) {
+                    this.player.inertiaY += 1;
+                }
+
+            }
+            if (event.keyCode == 68) { //D
+                console.log(event.keyCode);
+                if (this.player.inertiaX < 5) {
+                    this.player.inertiaX += 1;
+                    console.log("D");
+                    console.log(this.player.inertiaX);
+                }
+
+            }
+            //console.log(this.inertiaX);
+            //console.log(this.inertiaY);
+            console.log("Test");
+        }.bind(Cell_Division);
+
         this.startAnimation();
         console.log("started animation");
 
-        window.onkeydown = function (event) {
-            if (event.keyCode == 77) { //W
-                if (inertiaY > -5) {
-                    inertiaY -= 1;
-                }
-            }
-            if (event.keyCode == 97) { //A
-                if (inertiaX > -5) {
-                    inertiaX -= 1;
-                }
-
-            }
-            if (event.keyCode == 115) { //S
-                if (inertiaY < 5) {
-                    inertiaY += 1;
-                }
-
-            }
-            if (event.keyCode == 100) { //D
-                if (inertiaX < 5) {
-                    inertiaX += 1;
-                }
-
-            }
-            console.log(this.inertiaX);
-            console.log(this.inertiaY);
-            console.log("Hello");
-        }
+        
     },
+
+    createPlayer: function() {
+        let playerdiv = document.createElement("div");
+        playerdiv.className = "player";
+        this.container.append(playerdiv);
+        let player = {
+          mass: 0,
+          playerX: 250,
+          playerY: 500,
+          inertiaX: 0,
+          inertiaY: 0,
+          element: playerdiv,
+        }
+        return player;
+      },
 
     startAnimation: function () {
         this.animation1 = window.setInterval(this.animateGame.bind(Cell_Division), 20);
@@ -62,16 +78,17 @@ let Cell_Division = {
     },
 
     movePlayer: function () {
-    this.playerY += this.inertiaY;
-    this.playerX += this.inertiaX;
-    console.log(this.inertiaX);
-    console.log(this.inertiaY);
+    this.player.playerY = this.player.playerY + this.player.inertiaY;
+    this.player.playerX = this.player.playerX + this.player.inertiaX;
+    console.log(this.player.playerX);
+    console.log(this.player.playerY);
     },
 
     renderPlayer: function () {
-        this.player.element.style.top = this.playerX + "px";
-        this.player.element.style.left = this.playerY + "px";
-        this.player.element.style.height = (this.mass + 5) + "px";
+        this.player.element.style.top = this.player.playerY + "px";
+        this.player.element.style.left = this.player.playerX + "px";
+        this.player.element.style.height = (this.player.mass + 15) + "px";
+        this.player.element.style.width = (this.player.mass + 15) + "px";
     },
 
     moveWanderers: function () {
