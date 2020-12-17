@@ -8,7 +8,7 @@ let Cell_Division = {
     player: undefined,
 
     init: function () {
-        this.wanderers.push(this.createWanderer());
+        //this.wanderers.push(this.createWanderer());
         this.player = this.createPlayer();
         window.onkeydown = function (event) {
             if (event.keyCode == 87) { //W
@@ -45,46 +45,42 @@ let Cell_Division = {
         this.startAnimation();
         console.log("started animation");
 
-        
+
     },
 
-    createPlayer: function() {
+    createPlayer: function () {
         let playerdiv = document.createElement("div");
         playerdiv.className = "player";
         this.container.append(playerdiv);
         let player = {
-          mass: 0,
-          playerX: 250,
-          playerY: 500,
-          inertiaX: 0,
-          inertiaY: 0,
-          element: playerdiv,
+            mass: 0,
+            playerX: 250,
+            playerY: 500,
+            inertiaX: 0,
+            inertiaY: 0,
+            element: playerdiv,
         }
         return player;
-      },
+    },
 
     startAnimation: function () {
         this.animation1 = window.setInterval(this.animateGame.bind(Cell_Division), 20);
     },
 
-    createWanderer: function() {
-        let wanderdiv = document.createElement("div");
-        wanderdiv.className = "wanderer";
-        this.container.append(wanderdiv);
-        let wanderer = {
-          mass: Math.random() * 10,
-          playerX: Math.random() * 250 + 125,
-          playerY: Math.random() * 500 + 125,
-          inertiaX: 0,
-          inertiaY: 0,
-          element: wanderdiv,
-        }
-        return wanderer;
-      },
-
-    startAnimation: function () {
-        this.animation1 = window.setInterval(this.animateGame.bind(Cell_Division), 20);
-    },
+    //createWanderer: function() {
+    //    let wanderdiv = document.createElement("div");
+    //    wanderdiv.className = "wanderer";
+    //    this.container.append(wanderdiv);
+    //    let wanderer = {
+    //      mass: Math.random() * 10,
+    //      playerX: Math.random() * 250 + 125,
+    //     playerY: Math.random() * 500 + 125,
+    //      inertiaX: 0,
+    //      inertiaY: 0,
+    //      element: wanderdiv,
+    //    }
+    //    return wanderer;
+    //  },
 
     animateGame: function () {
         this.moveWanderers();
@@ -106,7 +102,7 @@ let Cell_Division = {
         }
         if (this.player.inertiaX < 0) {
             this.player.inertiaX += 0.05;
-            
+
         }
     },
 
@@ -115,10 +111,10 @@ let Cell_Division = {
     },
 
     movePlayer: function () {
-    this.player.playerY = this.player.playerY + this.player.inertiaY;
-    this.player.playerX = this.player.playerX + this.player.inertiaX;
-    console.log(this.player.playerX);
-    console.log(this.player.playerY);
+        this.player.playerY = this.player.playerY + this.player.inertiaY;
+        this.player.playerX = this.player.playerX + this.player.inertiaX;
+        console.log(this.player.playerX);
+        console.log(this.player.playerY);
     },
 
     renderPlayer: function () {
