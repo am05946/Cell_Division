@@ -8,6 +8,7 @@ let Cell_Division = {
     player: undefined,
 
     init: function () {
+        this.wanderers.push(this.createWanderer());
         this.player = this.createPlayer();
         window.onkeydown = function (event) {
             if (event.keyCode == 87) { //W
@@ -76,9 +77,9 @@ let Cell_Division = {
           playerY: Math.random() * 500 + 125,
           inertiaX: 0,
           inertiaY: 0,
-          element: playerdiv,
+          element: wanderdiv,
         }
-        return player;
+        return wanderer;
       },
 
     startAnimation: function () {
