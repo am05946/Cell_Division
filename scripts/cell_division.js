@@ -66,11 +66,47 @@ let Cell_Division = {
         this.animation1 = window.setInterval(this.animateGame.bind(Cell_Division), 20);
     },
 
+    createWanderer: function() {
+        let wanderdiv = document.createElement("div");
+        wanderdiv.className = "wanderer";
+        this.container.append(wanderdiv);
+        let wanderer = {
+          mass: Math.random() * 10,
+          playerX: Math.random() * 250 + 125,
+          playerY: Math.random() * 500 + 125,
+          inertiaX: 0,
+          inertiaY: 0,
+          element: playerdiv,
+        }
+        return player;
+      },
+
+    startAnimation: function () {
+        this.animation1 = window.setInterval(this.animateGame.bind(Cell_Division), 20);
+    },
+
     animateGame: function () {
         this.moveWanderers();
         this.renderWanderers();
         this.movePlayer();
         this.renderPlayer();
+        this.challengeInertia();
+    },
+
+    challengeInertia: function () {
+        if (this.player.inertiaY > 0) {
+            this.player.inertiaY -= 0.05;
+        }
+        if (this.player.inertiaX > 0) {
+            this.player.inertiaX -= 0.05;
+        }
+        if (this.player.inertiaY < 0) {
+            this.player.inertiaY += 0.05;
+        }
+        if (this.player.inertiaX < 0) {
+            this.player.inertiaX += 0.05;
+            
+        }
     },
 
     renderWanderers: function () {
@@ -87,8 +123,8 @@ let Cell_Division = {
     renderPlayer: function () {
         this.player.element.style.top = this.player.playerY + "px";
         this.player.element.style.left = this.player.playerX + "px";
-        this.player.element.style.height = (this.player.mass + 15) + "px";
-        this.player.element.style.width = (this.player.mass + 15) + "px";
+        this.player.element.style.height = (this.player.mass + 25) + "px";
+        this.player.element.style.width = (this.player.mass + 25) + "px";
     },
 
     moveWanderers: function () {
