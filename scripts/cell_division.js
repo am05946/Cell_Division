@@ -13,17 +13,17 @@ let Cell_Division = {
         this.wanderers.push(this.createWanderer());     //Create test wanderer
         window.onkeydown = function (event) {
             if (event.keyCode == 87) {     //W  (Move up)
-                this.up = true;
+                this.player.up = true;
                 console.log("W was pressed");
             }
             if (event.keyCode == 65) {    //A  (Move left)
-                this.left = true;
+                this.player.left = true;
             }
             if (event.keyCode == 83) {    //S  (Move down)
-                this.down = true;
+                this.player.down = true;
             }
             if (event.keyCode == 68) {    //D  (Move right)
-                this.right = true;
+                this.player.right = true;
             }
             //console.log(this.inertiaX);
             //console.log(this.inertiaY);
@@ -60,16 +60,18 @@ let Cell_Division = {
         playerdiv.className = "player";
         this.container.append(playerdiv);
         let player = {
-            mass: 0,
             playerX: 250,
             playerY: 500,
             inertiaX: 0,
             inertiaY: 0,
+            maxSpeed: 5,
+            friction: 5,
+            speed: 5,
+            mass: 0,
             right: false,
             down: false,
             left: false,
             up: false,
-            speed: 5,
             element: playerdiv,
         }
         return player;
@@ -85,7 +87,7 @@ let Cell_Division = {
             wandererY: Math.random() * 500 + 125,
             inertiaX: 0,
             inertiaY: 0,
-            friction: 5,
+            friction: 1,
             maxSpeed: 5,
             targetX: Math.random() * 250 + 125,
             targetY: Math.random() * 500 + 125,
@@ -151,8 +153,9 @@ let Cell_Division = {
             if (this.player.inertiaX <= this.player.maxSpeed) {    //Speed up if the inertia isn't already at Max
                 this.player.inertiaX = this.player.inertiaX + (this.player.speed / this.player.friction);     //Add the inertia to the players speed divided by the players friction
             }
-        } else if (this.player.right == false) {    //If the player isn't holding down D
-            while (this.player.inertiaX > 0 && this.player.left == false && this.player.right == false) {    //Repeat while player inertia is greater than 0 and player is inactive
+        }
+        if (this.player.right == false) {    //If the player isn't holding down D
+            while (this.player.inertiaX > 0) {    //Repeat while player inertia is greater than 0 and player is inactive
                 this.player.inertiaX = this.player.inertiaX - (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
                 if (this.player.inertiaX < 0.01) {    //If the players inertia gets close enough to 0, just set it to 0
                     this.player.inertiaX = 0;
@@ -165,9 +168,10 @@ let Cell_Division = {
             if (this.player.inertiaX >= -this.player.maxSpeed) {    //Speed up if the inertia isn't already at Max
                 this.player.inertiaX = this.player.inertiaX - (this.player.speed / this.player.friction);     //Add the inertia to the players speed divided by the players friction
             }
-        } else if (this.player.left == false) {    //If the player isn't holding down A
-            while (this.player.inertiaX < 0 && this.player.left == false && this.player.right == false) {    //Repeat while player inertia is greater than 0 and player is inactive
-                this.player.inertiaX = this.player.inertiaX - (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
+        }
+        if (this.player.left == false) {    //If the player isn't holding down A
+            while (this.player.inertiaX < 0) {    //Repeat while player inertia is greater than 0 and player is inactive
+                this.player.inertiaX = this.player.inertiaX + (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
                 if (this.player.inertiaX > -0.01) {    //If the players inertia gets close enough to 0, just set it to 0
                     this.player.inertiaX = 0;
                 }
@@ -176,11 +180,14 @@ let Cell_Division = {
 
         //The W key
         if (this.player.up == true) {    //Is W held down?
+            console.log("Forward March!");
             if (this.player.inertiaY <= this.player.maxSpeed) {    //Speed up if the inertia isn't already at Max
+            console.log("step on the gas");
                 this.player.inertiaY = this.player.inertiaY + (this.player.speed / this.player.friction);     //Add the inertia to the players speed divided by the players friction
             }
-        } else if (this.player.up == false) {    //If the player isn't holding down W
-            while (this.player.inertiaY > 0 && this.player.down == false && this.player.up == false) {    //Repeat while player inertia is greater than 0 and player is inactive
+        } 
+        if (this.player.up == false) {    //If the player isn't holding down W
+            while (this.player.inertiaY > 0) {    //Repeat while player inertia is greater than 0 and player is inactive
                 this.player.inertiaY = this.player.inertiaY - (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
                 if (this.player.inertiaY < 0.01) {    //If the players inertia gets close enough to 0, just set it to 0
                     this.player.inertiaY = 0;
@@ -193,19 +200,27 @@ let Cell_Division = {
             if (this.player.inertiaY >= -this.player.maxSpeed) {    //Speed up if the inertia isn't already at Max
                 this.player.inertiaY = this.player.inertiaY - (this.player.speed / this.player.friction);     //Add the inertia to the players speed divided by the players friction
             }
-        } else if (this.player.down == false) {    //If the player isn't holding down S
-            while (this.player.inertiaY < 0 && this.player.down == false && this.player.up == false) {    //Repeat while player inertia is greater than 0 and player is inactive
-                this.player.inertiaY = this.player.inertiaY - (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
+        }
+        if (this.player.down == false) {    //If the player isn't holding down S
+            while (this.player.inertiaY < 0) {    //Repeat while player inertia is greater than 0 and player is inactive
+                this.player.inertiaY = this.player.inertiaY + (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
                 if (this.player.inertiaY > -0.01) {    //If the players inertia gets close enough to 0, just set it to 0
                     this.player.inertiaY = 0;
                 }
             }
         }
+
+        if (this.player.playerY >= 770 || this.player.playerY <= 0) {     //Bounce on ceiling and floor
+            this.player.inertiaY = this.player.inertiaY * -1;
+        }
+        if (this.player.playerX >= 1770 || this.player.playerX <= 0) {     //Bounce on both walls
+            this.player.inertiaX = this.player.inertiaX * -1;
+        }
     },
 
     moveEntities: function () {
         //player
-        this.player.playerY = this.player.playerY + this.player.inertiaY;
+        this.player.playerY = this.player.playerY - this.player.inertiaY;
 this.player.playerX = this.player.playerX + this.player.inertiaX;
 console.log(this.player.playerX);
 console.log(this.player.playerY);
