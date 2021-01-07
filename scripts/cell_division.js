@@ -89,7 +89,24 @@ let Cell_Division = {
         this.moveEntities();
         this.renderEntities();
         this.challengeInertia();
+        this.collision();
     },
+    Collision: function () {
+            if (this.player + this.player.radius * 2 > 590) {
+              this.player.x_pos = 590 - this.player.radius * 2
+              this.player.x_velocity = this.player.x_velocity * -1
+            } else if (this.player.x_pos < 0) {
+              this.player.x_pos = 0
+              this.player.x_velocity = this.player.x_velocity * -1
+            }
+            if (this.player.y_pos + this.player.radius * 2 > 590) {
+              this.player.y_pos = 590 - this.player.radius * 2
+              this.player.y_velocity = this.player.y_velocity * -1
+            } else if (this.player.y_pos < 0) {
+              this.player.y_pos = 0
+              this.player.y_velocity = this.player.y_velocity * -1
+            }
+          },
 
     challengeInertia: function () {
         if (this.player.inertiaY > 0) {
