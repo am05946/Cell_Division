@@ -10,7 +10,9 @@ let Cell_Division = {
 
     init: function () {                                                       //----- Player Key Press Detection -----//                      
         this.player = this.createPlayer();     //Create player
+        //for (i = 0; i > 3; i++) {
         this.wanderers.push(this.createWanderer());     //Create test wanderer
+        //}
         window.onkeydown = function (event) {
             if (event.keyCode == 87) {     //W  (Move up)
                 this.player.up = true;
@@ -89,6 +91,8 @@ let Cell_Division = {
             inertiaY: 0,
             friction: 1,
             maxSpeed: 5,
+            energy: 0,
+            maxenergy: Math.random() * 250 + 125,
             targetX: Math.random() * 250 + 125,
             targetY: Math.random() * 500 + 125,
             element: wanderdiv,
@@ -106,23 +110,22 @@ let Cell_Division = {
         this.challengeInertia();
         this.collision();
         this.playerMovement();
+        this.wanderersDectect();
+        this.wanderersMove();
     },
-    Collision: function () {
-            if (this.player + this.player.radius * 2 > 590) {
-              this.player.x_pos = 590 - this.player.radius * 2
-              this.player.x_velocity = this.player.x_velocity * -1
-            } else if (this.player.x_pos < 0) {
-              this.player.x_pos = 0
-              this.player.x_velocity = this.player.x_velocity * -1
+
+    collision: function () {
+        for (let i = 0; i < this.wanderers.length; i++) {
+            let wanderer = this.wanderers[i];
+            let dx = wanderer.wandererX - this.player.playerX;
+            let dy = wanderer.wandererY - this.player.playerY;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < wanderer.mass + this.player.mass + 25) {
+                console.log("entity collided with");
             }
-            if (this.player.y_pos + this.player.radius * 2 > 590) {
-              this.player.y_pos = 590 - this.player.radius * 2
-              this.player.y_velocity = this.player.y_velocity * -1
-            } else if (this.player.y_pos < 0) {
-              this.player.y_pos = 0
-              this.player.y_velocity = this.player.y_velocity * -1
-            }
-          },
+        }
+    },
 
     challengeInertia: function () {
         if (this.player.inertiaY > 0) {
@@ -143,22 +146,61 @@ let Cell_Division = {
     wanderersDectect: function () {
         for (let i = 0; i < this.wanderers.length; i++) {
             let wanderer = this.wanderers[i];
-            for (let j = 0; j < this.wanderers.length; j++) {
-                let dx = wanderer.wandererX - this.wanderers[j].wandererX;
-                let dy = wanderer.wandererY - this.wanderers[j].wandererY;
-                let distance = Math.sqrt(dx * dx + dy * dy);
+            let dx = wanderer.wandererX - this.player.playerX;
+            let dy = wanderer.wandererY - this.player.playerY;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            console.log("selected");
 
-                if (distance < wanderer.mass + this.wanderers[j].mass) {
-                    console.log("entity detected");
+            if (distance < wanderer.mass + this.player.mass + 100) {
+                console.log("entity detected");
 
-                    if (wanderer.mass > this.wanderers[j].mass) {
-                        wanderer.targetX = this.wanderers[j].wandererX;
-                        wanderer.targetY = this.wanderers[j].wandererY;
-                        this.wanderers[j].inertiaX = this.wanderers[j].inertiaX / 2;
-                        this.wanderers[j].inertiaY = this.wanderers[j].inertiaY / 2;
-                    }
+                if (wanderer.mass > this.player.mass) {
+                    wanderer.targetX = this.player.playerX;
+                    wanderer.targetY = this.player.playerY;
+                    //console.log(wanderer.targetX)
+                    //console.log(wanderer.targetY)
                 }
             }
+        }
+
+    },
+
+    wanderersMove: function () {
+        for (let i = 0; i < this.wanderers.length; i++) {
+            let wanderer = this.wanderers[i];
+            if (wanderer.wandererX < wanderer.targetX) {
+                if (wanderer.inertiaX < 3) {
+                    wanderer.inertiaX = wanderer.inertiaX + 0.5;
+                }
+            }
+            if (wanderer.wandererX > wanderer.targetX) {
+                if (wanderer.inertiaX > -3) {
+                    wanderer.inertiaX = wanderer.inertiaX - 0.5;
+                }
+            }
+            if (wanderer.wandererY < wanderer.targetY) {
+                if (wanderer.inertiaY < 3) {
+                    wanderer.inertiaY = wanderer.inertiaY + 0.5;
+                }
+            }
+            if (wanderer.wandererY > wanderer.targetY) {
+                if (wanderer.inertiaY > -3) {
+                    wanderer.inertiaY = wanderer.inertiaY - 0.5;
+                }
+            }
+            if (wanderer.wanderY - wanderer.TargetY < 50 && wanderer.wanderY - wanderer.TargetY > -50 && wanderer.wanderX - wanderer.TargetX < 50 && wanderer.wanderX - wanderer.TargetX > -50) {
+                wanderer.energy = wanderer.energy + 1;
+            }
+            console.log("energy: " + wanderer.energy);
+
+            if (wanderer.energy >= wanderer.maxenergy) {
+                wanderer.targetX = Math.random() * 250 + 125;
+                wanderer.targetY = Math.random() * 250 + 125;
+                wanderer.energy = 0;
+            }
+            console.log(wanderer.inertiaY);
+            console.log(wanderer.inertiaX);
+            console.log(wanderer.wanderX - wanderer.targetX);
         }
 
     },
@@ -199,10 +241,10 @@ let Cell_Division = {
         if (this.player.up == true) {    //Is W held down?
             console.log("Forward March!");
             if (this.player.inertiaY <= this.player.maxSpeed) {    //Speed up if the inertia isn't already at Max
-            console.log("step on the gas");
+                console.log("step on the gas");
                 this.player.inertiaY = this.player.inertiaY + (this.player.speed / this.player.friction);     //Add the inertia to the players speed divided by the players friction
             }
-        } 
+        }
         if (this.player.up == false) {    //If the player isn't holding down W
             while (this.player.inertiaY > 0) {    //Repeat while player inertia is greater than 0 and player is inactive
                 this.player.inertiaY = this.player.inertiaY - (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
@@ -238,34 +280,37 @@ let Cell_Division = {
     moveEntities: function () {
         //player
         this.player.playerY = this.player.playerY - this.player.inertiaY;
-this.player.playerX = this.player.playerX + this.player.inertiaX;
-console.log(this.player.playerX);
-console.log(this.player.playerY);
+        this.player.playerX = this.player.playerX + this.player.inertiaX;
+        console.log(this.player.playerX);
+        console.log(this.player.playerY);
 
-//wanderers
-this.wanderers.wandererY = this.wanderers.wandererY + this.wanderers.inertiaY;
-this.wanderers.wandererX = this.wanderers.wandererX + this.wanderers.inertiaX;
+        //wanderers
+        for (let i = 0; i < this.wanderers.length; i++) {
+            this.wanderers[i].wandererY = this.wanderers[i].wandererY + this.wanderers[i].inertiaY;
+            this.wanderers[i].wandererX = this.wanderers[i].wandererX + this.wanderers[i].inertiaX;
+        }
 
         //chasers
     },
 
-renderEntities: function () {
-    //player
-    this.player.element.style.top = this.player.playerY + "px";
-    this.player.element.style.left = this.player.playerX + "px";
-    this.player.element.style.height = (this.player.mass + 25) + "px";
-    this.player.element.style.width = (this.player.mass + 25) + "px";
+    renderEntities: function () {
 
-    //wanderers
-    for (let i = 0; i < this.wanderers.length; i++) {
-        this.wanderers[i].element.style.top = this.wanderers[i].y_pos + "px";
-        this.wanderers[i].element.style.left = this.wanderers[i].x_pos + "px";
-        this.wanderers[i].element.style.height = (this.wanderers.mass + 25) + "px";
-        this.wanderers[i].element.style.width = (this.wanderers.mass + 25) + "px";
-    }
+        //player
+        this.player.element.style.top = this.player.playerY + "px";
+        this.player.element.style.left = this.player.playerX + "px";
+        this.player.element.style.height = (this.player.mass + 25) + "px";
+        this.player.element.style.width = (this.player.mass + 25) + "px";
 
-    //chasers
-},
+        //wanderers
+        for (let i = 0; i < this.wanderers.length; i++) {
+            this.wanderers[i].element.style.top = this.wanderers[i].wandererY + "px";
+            this.wanderers[i].element.style.left = this.wanderers[i].wandererX + "px";
+            this.wanderers[i].element.style.height = (this.wanderers[i].mass + 25) + "px";
+            this.wanderers[i].element.style.width = (this.wanderers[i].mass + 25) + "px";
+        }
+
+        //chasers
+    },
 
 }
 
