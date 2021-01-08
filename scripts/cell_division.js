@@ -13,9 +13,12 @@ let Cell_Division = {
 
     init: function () {                                                       //----- Player Key Press Detection -----//                      
         this.player = this.createPlayer();     //Create player
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 10; i++) {
         this.wanderers.push(this.createWanderer());     //Create test wanderer
         }
+        for (let i = 0; i < 3; i++) {
+            this.chasers.push(this.createChaser());     //Create test wanderer
+            }
         window.onkeydown = function (event) {
             if (event.keyCode == 87) {     //W  (Move up)
                 this.player.up = true;
@@ -72,7 +75,7 @@ let Cell_Division = {
             maxSpeed: 5,
             friction: 5,
             speed: 5,
-            mass: 0,
+            mass: 5,
             right: false,
             down: false,
             left: false,
@@ -87,13 +90,13 @@ let Cell_Division = {
         wanderdiv.className = "wanderer";
         this.container.append(wanderdiv);
         let wanderer = {
-            mass: Math.random() * 10,
+            mass: Math.random() * 50,
             wandererX: Math.random() * 250 + 125,
             wandererY: Math.random() * 500 + 125,
             inertiaX: 0,
             inertiaY: 0,
             friction: 1,
-            maxSpeed: 5,
+            maxSpeed:  Math.random() * 1 + 2,
             energy: 0,
             maxenergy: Math.random() * 250 + 125,
             targetX: Math.random() * 250 + 125,
@@ -101,6 +104,27 @@ let Cell_Division = {
             element: wanderdiv,
         }
         return wanderer;
+    },
+
+    createChaser: function () {
+        let chaserdiv = document.createElement("div");
+        chaserdiv.className = "chaser";
+        this.container.append(chaserdiv);
+        let chaser = {
+            mass: Math.random() * 50,
+            chaserX: Math.random() * 250 + 125,
+            chaserY: Math.random() * 500 + 125,
+            inertiaX: 0,
+            inertiaY: 0,
+            friction: 1,
+            maxSpeed:  Math.random() * 1 + 3,
+            energy: 0,
+            maxenergy: Math.random() * 250 + 100,
+            targetX: Math.random() * 250 + 125,
+            targetY: Math.random() * 500 + 125,
+            element: chaserdiv,
+        }
+        return chaser;
     },
 
     startAnimation: function () {
@@ -115,6 +139,8 @@ let Cell_Division = {
         this.playerMovement();
         this.wanderersDectect();
         this.wanderersMove();
+        this.chasersMove();
+        this.chasersDectect();
         this.addTime();
     },
 
@@ -123,6 +149,16 @@ let Cell_Division = {
             let wanderer = this.wanderers[i];
             let dx = wanderer.wandererX - this.player.playerX;
             let dy = wanderer.wandererY - this.player.playerY;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < wanderer.mass + this.player.mass + 25) {
+                console.log("entity collided with");
+            }
+        }
+        for (let i = 0; i < this.chasers.length; i++) {
+            let chaser = this.chasers[i];
+            let dx = chaser.chaserX - this.player.playerX;
+            let dy = chaser.chaserY - this.player.playerY;
             let distance = Math.sqrt(dx * dx + dy * dy);
 
             if (distance < wanderer.mass + this.player.mass + 25) {
@@ -165,7 +201,7 @@ let Cell_Division = {
             if (distance < wanderer.mass + this.player.mass + 100) {
                 console.log("entity detected");
 
-                if (wanderer.mass > this.player.mass) {
+                if (wanderer.mass > this.player.mass + 2) {
                     wanderer.targetX = this.player.playerX;
                     wanderer.targetY = this.player.playerY;
                     //console.log(wanderer.targetX)
@@ -176,43 +212,106 @@ let Cell_Division = {
 
     },
 
+    chasersDectect: function () {
+        for (let i = 0; i < this.chasers.length; i++) {
+            let chaser = this.chasers[i];
+            let dx = chaser.chaserX - this.player.playerX;
+            let dy = chaser.chaserY - this.player.playerY;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            console.log("selected");
+
+            if (distance < chaser.mass + this.player.mass + 200) {
+                console.log("entity detected");
+
+                if (chaser.mass > this.player.mass + 2) {
+                    chaser.targetX = this.player.playerX;
+                    chaser.targetY = this.player.playerY;
+                    //console.log(chaser.targetX)
+                    //console.log(chaser.targetY)
+                }
+            }
+        }
+
+    },
+
     wanderersMove: function () {
         for (let i = 0; i < this.wanderers.length; i++) {
             let wanderer = this.wanderers[i];
             if (wanderer.wandererX < wanderer.targetX) {
-                if (wanderer.inertiaX < 3) {
+                if (wanderer.inertiaX < wanderer.maxSpeed) {
                     wanderer.inertiaX = wanderer.inertiaX + 0.5;
                 }
             }
             if (wanderer.wandererX > wanderer.targetX) {
-                if (wanderer.inertiaX > -3) {
+                if (wanderer.inertiaX > -wanderer.maxSpeed) {
                     wanderer.inertiaX = wanderer.inertiaX - 0.5;
                 }
             }
             if (wanderer.wandererY < wanderer.targetY) {
-                if (wanderer.inertiaY < 3) {
+                if (wanderer.inertiaY < wanderer.maxSpeed) {
                     wanderer.inertiaY = wanderer.inertiaY + 0.5;
                 }
             }
             if (wanderer.wandererY > wanderer.targetY) {
-                if (wanderer.inertiaY > -3) {
+                if (wanderer.inertiaY > -wanderer.maxSpeed) {
                     wanderer.inertiaY = wanderer.inertiaY - 0.5;
                 }
             }
-            if (wanderer.wanderY - wanderer.TargetY < 50 && wanderer.wanderY - wanderer.TargetY > -50 && wanderer.wanderX - wanderer.TargetX < 50 && wanderer.wanderX - wanderer.TargetX > -50) {
+            if (wanderer.wandererY - wanderer.targetY < 50 && wanderer.wandererY - wanderer.targetY > -50 && wanderer.wandererX - wanderer.targetX < 50 && wanderer.wandererX - wanderer.targetX > -50) {
                 wanderer.energy = wanderer.energy + 1;
             }
             console.log("energy: " + wanderer.energy);
 
             if (wanderer.energy >= wanderer.maxenergy) {
-                wanderer.targetX = Math.random() * 250 + 125;
-                wanderer.targetY = Math.random() * 250 + 125;
+                wanderer.targetX = Math.random() * (1450 - (wanderer.mass * 2)) + wanderer.mass;                 //HERE Math.random() *
+                wanderer.targetY = Math.random() * (660 - (wanderer.mass * 2)) + wanderer.mass;                  //HERE Math.random() * 
                 wanderer.energy = 0;
             }
             console.log(wanderer.inertiaY);
             console.log(wanderer.inertiaX);
             console.log(wanderer.targetX)
             console.log(wanderer.wanderX - wanderer.targetX);
+        }
+
+    },
+
+    chasersMove: function () {
+        for (let i = 0; i < this.chasers.length; i++) {
+            let chaser = this.chasers[i];
+            if (chaser.chaserX < chaser.targetX) {
+                if (chaser.inertiaX < chaser.maxSpeed) {
+                    chaser.inertiaX = chaser.inertiaX + 1;
+                }
+            }
+            if (chaser.chaserX > chaser.targetX) {
+                if (chaser.inertiaX > -chaser.maxSpeed) {
+                    chaser.inertiaX = chaser.inertiaX - 1;
+                }
+            }
+            if (chaser.chaserY < chaser.targetY) {
+                if (chaser.inertiaY < chaser.maxSpeed) {
+                    chaser.inertiaY = chaser.inertiaY + 1;
+                }
+            }
+            if (chaser.chaserY > chaser.targetY) {
+                if (chaser.inertiaY > -chaser.maxSpeed) {
+                    chaser.inertiaY = chaser.inertiaY - 1;
+                }
+            }
+            if (chaser.chaserY - chaser.targetY < 50 && chaser.chaserY - chaser.targetY > -50 && chaser.chaserX - chaser.targetX < 50 && chaser.chaserX - chaser.targetX > -50) {
+                chaser.energy = chaser.energy + 1;
+            }
+            console.log("chaser energy: " + chaser.energy);
+
+            if (chaser.energy >= chaser.maxenergy) {
+                chaser.targetX = Math.random() * (1450 - (chaser.mass * 2)) + chaser.mass;                 //HERE Math.random() *
+                chaser.targetY = Math.random() * (660 - (chaser.mass * 2)) + chaser.mass;                  //HERE Math.random() * 
+                chaser.energy = 0;
+            }
+            console.log(chaser.inertiaY);
+            console.log(chaser.inertiaX);
+            console.log(chaser.targetX)
+            console.log(chaser.wanderX - chaser.targetX);
         }
 
     },
@@ -281,10 +380,10 @@ let Cell_Division = {
             }
         }
 
-        if (this.player.playerY >= 770 || this.player.playerY <= 0) {     //Bounce on ceiling and floor
+        if (this.player.playerY >= 665 || this.player.playerY <= 0) {     //Bounce on ceiling and floor
             this.player.inertiaY = this.player.inertiaY * -1;
         }
-        if (this.player.playerX >= 1770 || this.player.playerX <= 0) {     //Bounce on both walls
+        if (this.player.playerX >= 1465 || this.player.playerX <= 0) {     //Bounce on both walls
             this.player.inertiaX = this.player.inertiaX * -1;
         }
     },
@@ -303,6 +402,10 @@ let Cell_Division = {
         }
 
         //chasers
+        for (let i = 0; i < this.chasers.length; i++) {
+            this.chasers[i].chaserY = this.chasers[i].chaserY + this.chasers[i].inertiaY;
+            this.chasers[i].chaserX = this.chasers[i].chaserX + this.chasers[i].inertiaX;
+        }
     },
 
     renderEntities: function () {
@@ -319,9 +422,31 @@ let Cell_Division = {
             this.wanderers[i].element.style.left = this.wanderers[i].wandererX + "px";
             this.wanderers[i].element.style.height = (this.wanderers[i].mass + 25) + "px";
             this.wanderers[i].element.style.width = (this.wanderers[i].mass + 25) + "px";
+            if (this.wanderers[i].mass < this.player.mass - 2 ) {
+                this.wanderers[i].element.style.border = "3px solid rgb(0, 0, 40)";
+
+            } else if (this.wanderers[i].mass > this.player.mass + 2 ) {
+                this.wanderers[i].element.style.border = "3px solid rgb(40, 0, 0)";
+            } else {
+                this.wanderers[i].element.style.border = "3px solid rgb(0, 0, 0)";
+            }
         }
 
         //chasers
+        for (let i = 0; i < this.chasers.length; i++) {
+            this.chasers[i].element.style.top = this.chasers[i].chaserY + "px";
+            this.chasers[i].element.style.left = this.chasers[i].chaserX + "px";
+            this.chasers[i].element.style.height = (this.chasers[i].mass + 25) + "px";
+            this.chasers[i].element.style.width = (this.chasers[i].mass + 25) + "px";
+            if (this.chasers[i].mass < this.player.mass - 2 ) {
+                this.chasers[i].element.style.border = "3px solid rgb(0, 0, 40)";
+
+            } else if (this.chasers[i].mass > this.player.mass + 2 ) {
+                this.chasers[i].element.style.border = "3px solid rgb(40, 0, 0)";
+            } else {
+                this.chasers[i].element.style.border = "3px solid rgb(0, 0, 0)";
+            }
+        }
     },
 
 }
