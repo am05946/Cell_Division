@@ -7,6 +7,7 @@ let Cell_Division = {
     bloodcells: [],
     container: document.getElementById("playing_screen"),
     player: undefined,
+    timer: [],
 
     init: function () {                                                       //----- Player Key Press Detection -----//                      
         this.player = this.createPlayer();     //Create player
@@ -106,8 +107,9 @@ let Cell_Division = {
         this.challengeInertia();
         this.collision();
         this.playerMovement();
+        this.timer();
     },
-    Collision: function () {
+    collision: function () {
             if (this.player + this.player.radius * 2 > 590) {
               this.player.x_pos = 590 - this.player.radius * 2
               this.player.x_velocity = this.player.x_velocity * -1
@@ -123,7 +125,12 @@ let Cell_Division = {
               this.player.y_velocity = this.player.y_velocity * -1
             }
           },
+    timer: function () {
+        let realTimer = timer + 1
+        let actualrealTimer = realtimer/20 
 
+
+    },
     challengeInertia: function () {
         if (this.player.inertiaY > 0) {
             this.player.inertiaY -= 0.05;
