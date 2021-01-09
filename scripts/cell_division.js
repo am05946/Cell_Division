@@ -5,11 +5,13 @@ let Cell_Division = {
     chasers: [],
     spitters: [],
     bloodcells: [],
-    container: document.getElementById("playing_screen"),
+    pscore: document.getElementById("score_box").textContent,
+    container: document.getElementById("playing_screen"), 
     player: undefined,
     usedTime: 0,
-    realTime: 0,
-
+    frameTime: 0,
+    scoreBoard: 0,
+    highScore: 0,
 
     init: function () {                                                       //----- Player Key Press Detection -----//                      
         this.player = this.createPlayer();     //Create player
@@ -142,6 +144,7 @@ let Cell_Division = {
         this.chasersMove();
         this.chasersDectect();
         this.addTime();
+        this.score();
     },
 
     collision: function () {
@@ -184,10 +187,19 @@ let Cell_Division = {
     },
 
     addTime: function () {
-        this.realTime = this.realTime + 1;
-        this.usedTime = this.realTime/40;
+        this.frameTime = this.frameTime + 1;
+        this.usedTime = this.frameTime/40;
         console.log("Time passed: " + this.usedTime);
-        console.log("Real time passed: " + this.realTime);
+        console.log("Real time passed: " + this.frameTime);
+    },
+
+    score: function () {
+        this.scoreBoard = Math.round(this.player.mass * this.usedTime);
+        console.log("This is the current Score: " + this.scoreBoard);
+        if(this.scoreBoard > this.highScore);
+        this.highScore = this.scoreBoard;
+        console.log("This is the HighScore: " + this.highScore);
+
     },
 
     wanderersDectect: function () {
@@ -445,6 +457,8 @@ let Cell_Division = {
                 this.chasers[i].element.style.border = "3px solid rgb(40, 0, 0)";
             } else {
                 this.chasers[i].element.style.border = "3px solid rgb(0, 0, 0)";
+            //Shown Score
+            this.pscore = "Score = " + this.scoreBoard;
             }
         }
     },
