@@ -9,14 +9,83 @@ body {
     color: #333; 
 }
 
+h1 {
+    text-align: center;
+    margin: 10% 10% 10% 10%;
+
+}
+
+#start_button:hover {
+ background-color:rgb(0, 70, 100);
+ color:rgb(0, 122, 170);
+    border-top-color:rgb(0, 95, 136);
+    border-left-color:rgb(0, 95, 136);
+    border-bottom-color:rgb(0, 50, 71);
+    border-right-color:rgb(0, 50, 71);
+}
+
 #playing_screen {
     width: 1500px;
     height: 700px;
     border: 3px solid black;
-    border-radius: 10px;
     position: relative;
     margin: auto;
     background: gray;
+    font-size:1.6em;
+    text-align: center;
+}
+
+#start_button {
+    width: 225px;
+    height: 110px;
+    border: 5px solid;
+    position: absolute;
+    margin: auto;
+    background-color:rgb(0, 122, 170);
+    color:rgb(0, 183, 255);
+    top: 300px;
+    left: 634px;
+    border-radius: 10px;
+    border-bottom-color:rgb(0, 100, 139);
+    border-right-color:rgb(0, 100, 139);
+    border-left-color:rgb(0, 151, 211);
+    border-top-color:rgb(0, 151, 211);
+}
+
+#wander_zone {
+    width: 225px;
+    height: 225px;
+    border: 3px solid rgba(0,255,0,0.5);
+    position: absolute;
+    margin: auto;
+    border-style: dashed;
+    background:  rgba(0,255,0,0.3);
+    top: 1px;
+    left: 1268px;
+}
+
+#chaser_zone {
+    width: 225px;
+    height: 225px;
+    border: 3px solid rgba(255,0,0,0.5);
+    position: absolute;
+    margin: auto;
+    border-style: dashed;
+    background:  rgba(255,0,0,0.3);
+    top: 234px;
+    left: 1268px;
+}
+
+#split_zone {
+    width: 225px;
+    height: 225px;
+    border: 3px solid rgba(255,255,0,0.5);
+    position: absolute;
+    margin: auto;
+    border-style: dashed;
+    background:  rgba(255,255,0,0.3);
+    top: 467px;
+    left: 1268px;
 }
 
 .player {
@@ -46,6 +115,17 @@ body {
     width: 100px;
     height: 100px;
     background-color: rgb(83, 0, 0);
+    border: 3px solid rgb(0, 0, 0);
+    position: absolute;
+    top: 250px;
+    left: 500px;
+}
+
+.power {
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    background-color: rgb(6, 15, 20);
     border: 3px solid rgb(0, 0, 0);
     position: absolute;
     top: 250px;

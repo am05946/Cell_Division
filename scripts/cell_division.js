@@ -13,12 +13,7 @@ let Cell_Division = {
 
     init: function () {                                                       //----- Player Key Press Detection -----//                      
         this.player = this.createPlayer();     //Create player
-        for (let i = 0; i < 10; i++) {
-        this.wanderers.push(this.createWanderer());     //Create test wanderer
-        }
-        for (let i = 0; i < 3; i++) {
-            this.chasers.push(this.createChaser());     //Create test wanderer
-            }
+
         window.onkeydown = function (event) {
             if (event.keyCode == 87) {     //W  (Move up)
                 this.player.up = true;
@@ -59,8 +54,9 @@ let Cell_Division = {
 
         this.startAnimation();
         console.log("started animation");
+    },
 
-
+    startGame: function () {
     },
 
     createPlayer: function () {
