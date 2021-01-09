@@ -4,15 +4,23 @@ let Cell_Division = {
     wanderers: [],
     chasers: [],
     spitters: [],
-    bloodcells: [],
+    powers: [],
+    wanderzone: document.getElementById("wander_zone"),
+    splitzone: document.getElementById("split_zone"),
+    chaserzone: document.getElementById("chaser_zone"),
+    startbutton: document.getElementById("start_button"),
     container: document.getElementById("playing_screen"),
     player: undefined,
     usedTime: 0,
-    realTime: 0,
+    frameTime: 0,
 
 
     init: function () {                                                       //----- Player Key Press Detection -----//                      
         this.player = this.createPlayer();     //Create player
+        for (let i = 0; i < 3; i++) {
+            this.powers.push(this.createPower())
+        }
+        
 
         window.onkeydown = function (event) {
             if (event.keyCode == 87) {     //W  (Move up)
@@ -31,6 +39,11 @@ let Cell_Division = {
             //console.log(this.inertiaX);
             //console.log(this.inertiaY);
             console.log("Test");
+        }.bind(Cell_Division);
+
+        this.startbutton.onclick = function (event) {
+            this.startGame();
+            event.target.style.color = "rgba(40, 0, 0, " + (i/100) + ")";
         }.bind(Cell_Division);
 
         window.onkeyup = function (event) {
@@ -52,12 +65,18 @@ let Cell_Division = {
             console.log("Test");
         }.bind(Cell_Division);
 
-        this.startAnimation();
-        console.log("started animation");
     },
 
     startGame: function () {
-    },
+        this.startAnimation();
+        console.log("started animation");
+        this.powers[1].powerY = 285;
+        this.powers[2].powerY = 495;
+        this.powers[1].powerX = this.powers[1].powerX - 25;
+        this.powers[2].powerX = this.powers[2].powerX - 50
+        this.powers[1].mass = 100;
+        this.powers[2].mass = 150;
+        },
 
     createPlayer: function () {
         let playerdiv = document.createElement("div");
@@ -65,11 +84,11 @@ let Cell_Division = {
         this.container.append(playerdiv);
         let player = {
             playerX: 250,
-            playerY: 500,
+            playerY: 350,
             inertiaX: 0,
             inertiaY: 0,
             maxSpeed: 5,
-            friction: 5,
+            friction: 5,  //DO NOT TURN THIS TO A NEGATIVE VALUE (Or really any value below 1)
             speed: 5,
             mass: 5,
             right: false,
@@ -123,6 +142,19 @@ let Cell_Division = {
         return chaser;
     },
 
+    createPower: function () {
+        let powerdiv = document.createElement("div");
+        powerdiv.className = "power";
+        this.container.append(powerdiv);
+        let power = {
+            mass: 50,
+            powerX: 1345,
+            powerY: 75,
+            element: powerdiv,
+        }
+        return power;
+    },
+
     startAnimation: function () {
         this.animation1 = window.setInterval(this.animateGame.bind(Cell_Division), 20);
     },
@@ -138,6 +170,29 @@ let Cell_Division = {
         this.chasersMove();
         this.chasersDectect();
         this.addTime();
+        this.fade();
+        //this.player.mass = this.player.mass + 1;
+    },
+
+    fade: function () {
+        if (this.usedTime < 3.1) {
+            this.startbutton.style.color = "rgba(0, 122, 170, " + (1 - this.usedTime/3) + ")";
+            this.startbutton.style.backgroundColor = "rgba(0, 70, 100, " + (1 - this.usedTime/3) + ")";
+            this.startbutton.style.borderTopColor = "rgba(0, 95, 136, " + (1 - this.usedTime/3) + ")";
+            this.startbutton.style.borderLeftColor = "rgba(0, 95, 136, " + (1 - this.usedTime/3) + ")";
+            this.startbutton.style.borderRightColor = "rgba(0, 50, 71, " + (1 - this.usedTime/3) + ")";
+            this.startbutton.style.borderBottomColor = "rgba(0, 50, 71, " + (1 - this.usedTime/3) + ")";
+        }
+        if (this.usedTime < 3.1) {
+            this.player.element.style.backgroundColor = "rgba(255, 255, 255, " + (this.usedTime/3) + ")";
+            this.player.element.style.border = "3px solid rgba(0, 0, 0, " + (this.usedTime/3) + ")";
+            this.wanderzone.style.backgroundColor = "rgba(0,255,0, " + (this.usedTime/10) + ")";
+            this.wanderzone.style.border = "3px dashed rgba(0,255,0, " + (this.usedTime/6) + ")";
+            this.splitzone.style.backgroundColor = "rgba(255,255,0, " + (this.usedTime/10) + ")";
+            this.splitzone.style.border = "3px dashed rgba(255,255,0, " + (this.usedTime/6) + ")";
+            this.chaserzone.style.backgroundColor = "rgba(255,0,0, " + (this.usedTime/10) + ")";
+            this.chaserzone.style.border = "3px dashed rgba(255,0,0, " + (this.usedTime/6) + ")";
+        }
     },
 
     collision: function () {
@@ -180,10 +235,10 @@ let Cell_Division = {
     },
 
     addTime: function () {
-        this.realTime = this.realTime + 1;
-        this.usedTime = this.realTime/40;
+        this.frameTime = this.frameTime + 1;
+        this.usedTime = this.frameTime/40;
         console.log("Time passed: " + this.usedTime);
-        console.log("Real time passed: " + this.realTime);
+        console.log("Real time passed: " + this.frameTime);
     },
 
     wanderersDectect: function () {
@@ -441,6 +496,21 @@ let Cell_Division = {
                 this.chasers[i].element.style.border = "3px solid rgb(40, 0, 0)";
             } else {
                 this.chasers[i].element.style.border = "3px solid rgb(0, 0, 0)";
+            }
+        }
+        //power cells
+        for (let i = 0; i < this.powers.length; i++) {
+            this.powers[i].element.style.top = this.powers[i].powerY + "px";
+            this.powers[i].element.style.left = this.powers[i].powerX + "px";
+            this.powers[i].element.style.height = (this.powers[i].mass + 25) + "px";
+            this.powers[i].element.style.width = (this.powers[i].mass + 25) + "px";
+            if (this.powers[i].mass < this.player.mass - 2 ) {
+                this.powers[i].element.style.border = "3px solid rgb(0, 0, 40)";
+
+            } else if (this.powers[i].mass > this.player.mass + 2 ) {
+                this.powers[i].element.style.border = "3px solid rgb(40, 0, 0)";
+            } else {
+                this.powers[i].element.style.border = "3px solid rgb(0, 0, 0)";
             }
         }
     },
