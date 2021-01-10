@@ -125,8 +125,8 @@ h1 {
     border-radius: 50%;
     width: 100px;
     height: 100px;
-    background-color: rgb(6, 15, 20);
-    border: 3px solid rgb(0, 0, 0);
+    background-color: rgba(6, 15, 20, 0);
+    border: 3px solid rgba(0, 0, 0, 0);
     position: absolute;
     top: 250px;
     left: 500px;

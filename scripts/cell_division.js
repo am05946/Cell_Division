@@ -1,6 +1,7 @@
 let Cell_Division = {
 
     animation1: undefined,
+    player: undefined,
     wanderers: [],
     chasers: [],
     spitters: [],
@@ -10,9 +11,9 @@ let Cell_Division = {
     chaserzone: document.getElementById("chaser_zone"),
     startbutton: document.getElementById("start_button"),
     container: document.getElementById("playing_screen"),
-    player: undefined,
     usedTime: 0,
     frameTime: 0,
+    gamestart: false,
 
 
     init: function () {                                                       //----- Player Key Press Detection -----//                      
@@ -25,7 +26,7 @@ let Cell_Division = {
         window.onkeydown = function (event) {
             if (event.keyCode == 87) {     //W  (Move up)
                 this.player.up = true;
-                console.log("W was pressed");
+                //console.log("W was pressed");
             }
             if (event.keyCode == 65) {    //A  (Move left)
                 this.player.left = true;
@@ -38,18 +39,20 @@ let Cell_Division = {
             }
             //console.log(this.inertiaX);
             //console.log(this.inertiaY);
-            console.log("Test");
+            //console.log("Test");
         }.bind(Cell_Division);
 
         this.startbutton.onclick = function (event) {
+            if (this.gamestart == false) {
             this.startGame();
-            event.target.style.color = "rgba(40, 0, 0, " + (i/100) + ")";
+            this.gamestart = true;
+            }
         }.bind(Cell_Division);
 
         window.onkeyup = function (event) {
             if (event.keyCode == 87) {    //!W  (Stop moving Move up)
                 this.player.up = false;
-                console.log("W was released");
+                //console.log("W was released");
             }
             if (event.keyCode == 65) {    //!A  (Stop moving Move left)
                 this.player.left = false;
@@ -62,7 +65,7 @@ let Cell_Division = {
             }
             //console.log(this.inertiaX);
             //console.log(this.inertiaY);
-            console.log("Test");
+            //console.log("Test");
         }.bind(Cell_Division);
 
     },
@@ -88,8 +91,8 @@ let Cell_Division = {
             inertiaX: 0,
             inertiaY: 0,
             maxSpeed: 5,
-            friction: 5,  //DO NOT TURN THIS TO A NEGATIVE VALUE (Or really any value below 1)
-            speed: 5,
+            friction: 7,  //DO NOT TURN THIS TO A NEGATIVE VALUE (Or really any value below 1)
+            speed: 0.4,
             mass: 5,
             right: false,
             down: false,
@@ -171,7 +174,7 @@ let Cell_Division = {
         this.chasersDectect();
         this.addTime();
         this.fade();
-        //this.player.mass = this.player.mass + 1;
+        //this.player.mass = this.player.mass + 0.5;
     },
 
     fade: function () {
@@ -192,6 +195,10 @@ let Cell_Division = {
             this.splitzone.style.border = "3px dashed rgba(255,255,0, " + (this.usedTime/6) + ")";
             this.chaserzone.style.backgroundColor = "rgba(255,0,0, " + (this.usedTime/10) + ")";
             this.chaserzone.style.border = "3px dashed rgba(255,0,0, " + (this.usedTime/6) + ")";
+            for (i = 0; i < this.powers.length; i++) {
+                this.powers[i].element.style.backgroundColor = "rgba(6, 15, 20, " + (this.usedTime/3) + ")";
+                this.powers[i].element.style.border = "3px solid rgba(40, 0, 0, " + (this.usedTime/3) + ")";
+            }
         }
     },
 
@@ -369,79 +376,82 @@ let Cell_Division = {
 
     playerMovement: function () {                                     //----- Player Movement -----//
 
-        //The D key
-        if (this.player.right == true) {    //Is D held down?
-            if (this.player.inertiaX <= this.player.maxSpeed) {    //Speed up if the inertia isn't already at Max
-                this.player.inertiaX = this.player.inertiaX + (this.player.speed / this.player.friction);     //Add the inertia to the players speed divided by the players friction
-            }
-        }
-        if (this.player.right == false) {    //If the player isn't holding down D
-            while (this.player.inertiaX > 0) {    //Repeat while player inertia is greater than 0 and player is inactive
-                this.player.inertiaX = this.player.inertiaX - (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
-                if (this.player.inertiaX < 0.01) {    //If the players inertia gets close enough to 0, just set it to 0
-                    this.player.inertiaX = 0;
-                }
-            }
-        }
-
         //The A key
-        if (this.player.left == true) {    //Is A held down?
-            if (this.player.inertiaX >= -this.player.maxSpeed) {    //Speed up if the inertia isn't already at Max
-                this.player.inertiaX = this.player.inertiaX - (this.player.speed / this.player.friction);     //Add the inertia to the players speed divided by the players friction
+        if (this.player.left == true) {    //Is W held down?
+            if (this.player.inertiaX > -this.player.maxSpeed) {
+                this.player.inertiaX = this.player.inertiaX - this.player.speed
+            } else if (this.player.inertiaX <= -this.player.maxSpeed) {
+                this.player.inertiaX = -this.player.maxSpeed
+            }
+        } else if (this.player.inertiaX < 0) {
+            this.player.inertiaX = this.player.inertiaX + this.player.speed
+            if (this.player.inertiaX > -1 && this.player.right == false) {
+                this.player.inertiaX = 0;
             }
         }
-        if (this.player.left == false) {    //If the player isn't holding down A
-            while (this.player.inertiaX < 0) {    //Repeat while player inertia is greater than 0 and player is inactive
-                this.player.inertiaX = this.player.inertiaX + (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
-                if (this.player.inertiaX > -0.01) {    //If the players inertia gets close enough to 0, just set it to 0
-                    this.player.inertiaX = 0;
-                }
+        console.log("Xinertia: " + this.player.inertiaX);
+
+        //The D key
+        if (this.player.right == true) {    //Is W held down?
+            if (this.player.inertiaX < this.player.maxSpeed) {
+                this.player.inertiaX = this.player.inertiaX + this.player.speed
+            } else if (this.player.inertiaX >= this.player.maxSpeed) {
+                this.player.inertiaX = this.player.maxSpeed
+            }
+        } else if (this.player.inertiaX > 0) {
+            this.player.inertiaX = this.player.inertiaX - this.player.speed
+            if (this.player.inertiaX < 1 && this.player.left == false) {
+                this.player.inertiaX = 0;
             }
         }
 
         //The W key
         if (this.player.up == true) {    //Is W held down?
-            console.log("Forward March!");
-            if (this.player.inertiaY <= this.player.maxSpeed) {    //Speed up if the inertia isn't already at Max
-                console.log("step on the gas");
-                this.player.inertiaY = this.player.inertiaY + (this.player.speed / this.player.friction);     //Add the inertia to the players speed divided by the players friction
+            if (this.player.inertiaY > -this.player.maxSpeed) {
+                this.player.inertiaY = this.player.inertiaY - this.player.speed
+            } else if (this.player.inertiaY <= -this.player.maxSpeed) {
+                this.player.inertiaY = -this.player.maxSpeed
+            }
+        } else if (this.player.inertiaY < 0) {
+            this.player.inertiaY = this.player.inertiaY + this.player.speed
+            if (this.player.inertiaY > -1 && this.player.down == false) {
+                this.player.inertiaY = 0;
             }
         }
-        if (this.player.up == false) {    //If the player isn't holding down W
-            while (this.player.inertiaY > 0) {    //Repeat while player inertia is greater than 0 and player is inactive
-                this.player.inertiaY = this.player.inertiaY - (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
-                if (this.player.inertiaY < 0.01) {    //If the players inertia gets close enough to 0, just set it to 0
-                    this.player.inertiaY = 0;
-                }
-            }
-        }
+        console.log("Yinertia: " + this.player.inertiaY);
 
         //The S key
-        if (this.player.down == true) {    //Is S held down?
-            if (this.player.inertiaY >= -this.player.maxSpeed) {    //Speed up if the inertia isn't already at Max
-                this.player.inertiaY = this.player.inertiaY - (this.player.speed / this.player.friction);     //Add the inertia to the players speed divided by the players friction
+        if (this.player.down == true) {    //Is W held down?
+            if (this.player.inertiaY < this.player.maxSpeed) {
+                this.player.inertiaY = this.player.inertiaY + this.player.speed
+            } else if (this.player.inertiaY >= this.player.maxSpeed) {
+                this.player.inertiaY = this.player.maxSpeed
             }
-        }
-        if (this.player.down == false) {    //If the player isn't holding down S
-            while (this.player.inertiaY < 0) {    //Repeat while player inertia is greater than 0 and player is inactive
-                this.player.inertiaY = this.player.inertiaY + (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
-                if (this.player.inertiaY > -0.01) {    //If the players inertia gets close enough to 0, just set it to 0
-                    this.player.inertiaY = 0;
-                }
+        } else if (this.player.inertiaY > 0) {
+            this.player.inertiaY = this.player.inertiaY - this.player.speed
+            if (this.player.inertiaY < 1 && this.player.up == false) {
+                this.player.inertiaY = 0;
             }
         }
 
-        if (this.player.playerY >= 665 || this.player.playerY <= 0) {     //Bounce on ceiling and floor
+        if (this.player.playerY >= 665 && this.player.inertiaY > 0) {     //Bounce on ceiling and floor
             this.player.inertiaY = this.player.inertiaY * -1;
         }
-        if (this.player.playerX >= 1465 || this.player.playerX <= 0) {     //Bounce on both walls
+        if (this.player.playerX >= 1465 && this.player.inertiaX > 0) {     //Bounce on both walls
             this.player.inertiaX = this.player.inertiaX * -1;
         }
+        if (this.player.playerY <= 0 && this.player.inertiaY < 0) {     //Bounce on ceiling and floor
+            this.player.inertiaY = this.player.inertiaY * -1;
+        }
+        if (this.player.playerX <= 0 && this.player.inertiaX < 0) {     //Bounce on both walls
+            this.player.inertiaX = this.player.inertiaX * -1;
+        }
+        
     },
 
     moveEntities: function () {
         //player
-        this.player.playerY = this.player.playerY - this.player.inertiaY;
+        this.player.playerY = this.player.playerY + this.player.inertiaY;
         this.player.playerX = this.player.playerX + this.player.inertiaX;
         console.log(this.player.playerX);
         console.log(this.player.playerY);
@@ -466,6 +476,7 @@ let Cell_Division = {
         this.player.element.style.left = this.player.playerX + "px";
         this.player.element.style.height = (this.player.mass + 25) + "px";
         this.player.element.style.width = (this.player.mass + 25) + "px";
+        this.player.element.style.zIndex = (this.player.mass * 1);
 
         //wanderers
         for (let i = 0; i < this.wanderers.length; i++) {
@@ -473,6 +484,7 @@ let Cell_Division = {
             this.wanderers[i].element.style.left = this.wanderers[i].wandererX + "px";
             this.wanderers[i].element.style.height = (this.wanderers[i].mass + 25) + "px";
             this.wanderers[i].element.style.width = (this.wanderers[i].mass + 25) + "px";
+            this.wanderers[i].element.style.zIndex = (this.powers[i].mass * 1);
             if (this.wanderers[i].mass < this.player.mass - 2 ) {
                 this.wanderers[i].element.style.border = "3px solid rgb(0, 0, 40)";
 
@@ -489,6 +501,7 @@ let Cell_Division = {
             this.chasers[i].element.style.left = this.chasers[i].chaserX + "px";
             this.chasers[i].element.style.height = (this.chasers[i].mass + 25) + "px";
             this.chasers[i].element.style.width = (this.chasers[i].mass + 25) + "px";
+            this.chasers[i].element.style.zIndex = (this.powers[i].mass * 1);
             if (this.chasers[i].mass < this.player.mass - 2 ) {
                 this.chasers[i].element.style.border = "3px solid rgb(0, 0, 40)";
 
@@ -504,6 +517,7 @@ let Cell_Division = {
             this.powers[i].element.style.left = this.powers[i].powerX + "px";
             this.powers[i].element.style.height = (this.powers[i].mass + 25) + "px";
             this.powers[i].element.style.width = (this.powers[i].mass + 25) + "px";
+            this.powers[i].element.style.zIndex = (this.powers[i].mass * 1);
             if (this.powers[i].mass < this.player.mass - 2 ) {
                 this.powers[i].element.style.border = "3px solid rgb(0, 0, 40)";
 
