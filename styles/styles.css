@@ -15,6 +15,20 @@ h1 {
     user-select: none;
 }
 
+h2 {
+    text-align: center;
+    margin: 10% 10% 10% 10%;
+    user-select: none;
+}
+
+red {
+    color: rgb(50, 0, 0);
+}
+
+blue {
+    color: rgb(0, 0, 40);
+}
+
 #start_button:hover {
  background-color:rgb(0, 70, 100);
  color:rgb(0, 122, 170);
@@ -33,6 +47,11 @@ h1 {
     background: gray;
     font-size:1.6em;
     text-align: center;
+}
+
+#tutorial {
+    text-align: center;
+    color: rgba(0, 0, 0, 0)
 }
 
 #start_button {

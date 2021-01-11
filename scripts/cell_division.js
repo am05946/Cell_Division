@@ -11,6 +11,7 @@ let Cell_Division = {
     chaserzone: document.getElementById("chaser_zone"),
     startbutton: document.getElementById("start_button"),
     container: document.getElementById("playing_screen"),
+    tutorialText: document.getElementById("tutorial"),
     usedTime: 0,
     frameTime: 0,
     gamestart: false,
@@ -21,7 +22,7 @@ let Cell_Division = {
         for (let i = 0; i < 3; i++) {
             this.powers.push(this.createPower())
         }
-        
+
 
         window.onkeydown = function (event) {
             if (event.keyCode == 87) {     //W  (Move up)
@@ -44,8 +45,8 @@ let Cell_Division = {
 
         this.startbutton.onclick = function (event) {
             if (this.gamestart == false) {
-            this.startGame();
-            this.gamestart = true;
+                this.startGame();
+                this.gamestart = true;
             }
         }.bind(Cell_Division);
 
@@ -79,7 +80,7 @@ let Cell_Division = {
         this.powers[2].powerX = this.powers[2].powerX - 50
         this.powers[1].mass = 100;
         this.powers[2].mass = 150;
-        },
+    },
 
     createPlayer: function () {
         let playerdiv = document.createElement("div");
@@ -109,13 +110,14 @@ let Cell_Division = {
         this.container.append(wanderdiv);
         let wanderer = {
             mass: Math.random() * 50,
-            wandererX: Math.random() * 250 + 125,
-            wandererY: Math.random() * 500 + 125,
+            wandererX: this.powers[0].powerX,
+            wandererY: this.powers[0].powerY,
             inertiaX: 0,
             inertiaY: 0,
             friction: 1,
-            maxSpeed:  Math.random() * 1 + 2,
+            maxSpeed: Math.random() * 1 + 2,
             energy: 0,
+            eaten: false,
             maxenergy: Math.random() * 250 + 125,
             targetX: Math.random() * 250 + 125,
             targetY: Math.random() * 500 + 125,
@@ -135,9 +137,9 @@ let Cell_Division = {
             inertiaX: 0,
             inertiaY: 0,
             friction: 1,
-            maxSpeed:  Math.random() * 1 + 3,
+            maxSpeed: Math.random() * 1 + 3,
             energy: 0,
-            maxenergy: Math.random() * 250 + 100,
+            maxenergy: Math.random() * 250 + 25,
             targetX: Math.random() * 250 + 125,
             targetY: Math.random() * 500 + 125,
             element: chaserdiv,
@@ -179,26 +181,92 @@ let Cell_Division = {
 
     fade: function () {
         if (this.usedTime < 3.1) {
-            this.startbutton.style.color = "rgba(0, 122, 170, " + (1 - this.usedTime/3) + ")";
-            this.startbutton.style.backgroundColor = "rgba(0, 70, 100, " + (1 - this.usedTime/3) + ")";
-            this.startbutton.style.borderTopColor = "rgba(0, 95, 136, " + (1 - this.usedTime/3) + ")";
-            this.startbutton.style.borderLeftColor = "rgba(0, 95, 136, " + (1 - this.usedTime/3) + ")";
-            this.startbutton.style.borderRightColor = "rgba(0, 50, 71, " + (1 - this.usedTime/3) + ")";
-            this.startbutton.style.borderBottomColor = "rgba(0, 50, 71, " + (1 - this.usedTime/3) + ")";
-        }
-        if (this.usedTime < 3.1) {
-            this.player.element.style.backgroundColor = "rgba(255, 255, 255, " + (this.usedTime/3) + ")";
-            this.player.element.style.border = "3px solid rgba(0, 0, 0, " + (this.usedTime/3) + ")";
-            this.wanderzone.style.backgroundColor = "rgba(0,255,0, " + (this.usedTime/10) + ")";
-            this.wanderzone.style.border = "3px dashed rgba(0,255,0, " + (this.usedTime/6) + ")";
-            this.splitzone.style.backgroundColor = "rgba(255,255,0, " + (this.usedTime/10) + ")";
-            this.splitzone.style.border = "3px dashed rgba(255,255,0, " + (this.usedTime/6) + ")";
-            this.chaserzone.style.backgroundColor = "rgba(255,0,0, " + (this.usedTime/10) + ")";
-            this.chaserzone.style.border = "3px dashed rgba(255,0,0, " + (this.usedTime/6) + ")";
+            this.startbutton.style.color = "rgba(0, 122, 170, " + (1 - this.usedTime / 3) + ")";
+            this.startbutton.style.backgroundColor = "rgba(0, 70, 100, " + (1 - this.usedTime / 3) + ")";
+            this.startbutton.style.borderTopColor = "rgba(0, 95, 136, " + (1 - this.usedTime / 3) + ")";
+            this.startbutton.style.borderLeftColor = "rgba(0, 95, 136, " + (1 - this.usedTime / 3) + ")";
+            this.startbutton.style.borderRightColor = "rgba(0, 50, 71, " + (1 - this.usedTime / 3) + ")";
+            this.startbutton.style.borderBottomColor = "rgba(0, 50, 71, " + (1 - this.usedTime / 3) + ")";
+            this.player.element.style.backgroundColor = "rgba(255, 255, 255, " + (this.usedTime / 3) + ")";
+            this.player.element.style.border = "3px solid rgba(0, 0, 0, " + (this.usedTime / 3) + ")";
+            this.wanderzone.style.backgroundColor = "rgba(0,255,0, " + (this.usedTime / 10) + ")";
+            this.wanderzone.style.border = "3px dashed rgba(0,255,0, " + (this.usedTime / 6) + ")";
+            this.splitzone.style.backgroundColor = "rgba(255,255,0, " + (this.usedTime / 10) + ")";
+            this.splitzone.style.border = "3px dashed rgba(255,255,0, " + (this.usedTime / 6) + ")";
+            this.chaserzone.style.backgroundColor = "rgba(255,0,0, " + (this.usedTime / 10) + ")";
+            this.chaserzone.style.border = "3px dashed rgba(255,0,0, " + (this.usedTime / 6) + ")";
             for (i = 0; i < this.powers.length; i++) {
-                this.powers[i].element.style.backgroundColor = "rgba(6, 15, 20, " + (this.usedTime/3) + ")";
-                this.powers[i].element.style.border = "3px solid rgba(40, 0, 0, " + (this.usedTime/3) + ")";
+                this.powers[i].element.style.backgroundColor = "rgba(6, 15, 20, " + (this.usedTime / 3) + ")";
+                this.powers[i].element.style.border = "3px solid rgba(40, 0, 0, " + (this.usedTime / 3) + ")";
             }
+
+        }
+        if (this.usedTime > 3 && this.usedTime < 6.1) {                                               //Starting Tutorial//
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 3) / 3) + ")";
+        }
+        if (this.usedTime > 9 && this.usedTime < 12.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 9) / 3) + ")";
+        }
+        if (this.usedTime > 12 && this.usedTime < 15.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>You are a white blood cell</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 12) / 3) + ")";
+        }
+        if (this.usedTime > 18 && this.usedTime < 21.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 18) / 3) + ")";
+        }
+        if (this.usedTime > 21 && this.usedTime < 24.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>and your job is to eliminate viruses.</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 21) / 3) + ")";
+        }
+        if (this.usedTime > 27 && this.usedTime < 30.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 27) / 3) + ")";
+        }
+        if (this.usedTime > 30 && this.usedTime < 33.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>Here comes one now.</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 30) / 3) + ")";
+        }
+        if (this.usedTime == 33) {
+            this.wanderers.push(this.createWanderer());
+            this.wanderers[0].mass = 6;
+        }
+        if (this.usedTime > 36 && this.usedTime < 39.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 36) / 3) + ")";
+        }
+        if (this.usedTime > 39 && this.usedTime < 42.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>This virus has a black outline as it is around your size.</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 39) / 3) + ")";
+        }
+        if (this.usedTime > 42 && this.usedTime < 45.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 42) / 3) + ")";
+        }
+        if (this.usedTime > 45 && this.usedTime < 48.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>Viruses bigger than you will have a <red>red</red> outline</h2> <h2>while viruses smaller than you will have a <blue>blue</blue> outline</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 45) / 3) + ")";
+        }
+        if (this.usedTime > 51 && this.usedTime < 54.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 51) / 3) + ")";
+        }
+        if (this.usedTime > 54 && this.usedTime < 57.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>You can consume viruses with a <blue>blue</blue> outline</h2> <h2>and viruses with a <red>red</red> outline can consume you</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 54) / 3) + ")";
+        }
+        if (this.usedTime > 60 && this.usedTime < 63.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 60) / 3) + ")";
+        }
+        if (this.usedTime > 63 && this.usedTime < 66.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>Try to consume this <blue>blue</blue> one here</h2> <h2>(and avoid the big <red>red</red> one)</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 63) / 3) + ")";
+        }
+        if (this.usedTime > 69 && this.usedTime < 72.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 69) / 3) + ")";
+        }
+        if (this.usedTime == 64) {
+            this.wanderers.push(this.createWanderer());
+            this.wanderers[1].mass = 1;
+        }
+        if (this.usedTime == 67) {
+            this.wanderers.push(this.createWanderer());
+            this.wanderers[2].mass = 10;
         }
     },
 
@@ -211,6 +279,15 @@ let Cell_Division = {
 
             if (distance < wanderer.mass + this.player.mass + 25) {
                 console.log("entity collided with");
+                if (wanderer.mass < this.player.mass - 2 && wanderer.eaten == false) {
+                    this.player.mass = this.player.mass + wanderer.mass
+                    wanderer.element.style.backgroundColor = "rgba(0, 0, 0, 0)";                                 //MAKE THIS MORE EFFICIENT (make it actually delete them instead of just hiding them)
+                    wanderer.element.style.border = "rgba(0, 0, 0, 0)";
+                    wanderer.eaten = true;
+                    
+                } else if (this.wanderers[i].mass > this.player.mass + 2) {
+                    this.wanderers[i].element.style.border = "3px solid rgb(40, 0, 0)";
+                }
             }
         }
         for (let i = 0; i < this.chasers.length; i++) {
@@ -219,7 +296,7 @@ let Cell_Division = {
             let dy = chaser.chaserY - this.player.playerY;
             let distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < wanderer.mass + this.player.mass + 25) {
+            if (distance < wanderer.mass + this.player.mass + 10) {
                 console.log("entity collided with");
             }
         }
@@ -243,9 +320,9 @@ let Cell_Division = {
 
     addTime: function () {
         this.frameTime = this.frameTime + 1;
-        this.usedTime = this.frameTime/40;
-        console.log("Time passed: " + this.usedTime);
-        console.log("Real time passed: " + this.frameTime);
+        this.usedTime = this.frameTime / 40;
+        console.log("Used Time: " + this.usedTime);
+        console.log("Frame Time: " + this.frameTime);
     },
 
     wanderersDectect: function () {
@@ -254,10 +331,10 @@ let Cell_Division = {
             let dx = wanderer.wandererX - this.player.playerX;
             let dy = wanderer.wandererY - this.player.playerY;
             let distance = Math.sqrt(dx * dx + dy * dy);
-            console.log("selected");
+            //console.log("selected");
 
             if (distance < wanderer.mass + this.player.mass + 100) {
-                console.log("entity detected");
+                //console.log("entity detected");
 
                 if (wanderer.mass > this.player.mass + 2) {
                     wanderer.targetX = this.player.playerX;
@@ -389,7 +466,7 @@ let Cell_Division = {
                 this.player.inertiaX = 0;
             }
         }
-        console.log("Xinertia: " + this.player.inertiaX);
+        //console.log("Xinertia: " + this.player.inertiaX);
 
         //The D key
         if (this.player.right == true) {    //Is W held down?
@@ -418,7 +495,7 @@ let Cell_Division = {
                 this.player.inertiaY = 0;
             }
         }
-        console.log("Yinertia: " + this.player.inertiaY);
+        //console.log("Yinertia: " + this.player.inertiaY);
 
         //The S key
         if (this.player.down == true) {    //Is W held down?
@@ -446,15 +523,15 @@ let Cell_Division = {
         if (this.player.playerX <= 0 && this.player.inertiaX < 0) {     //Bounce on both walls
             this.player.inertiaX = this.player.inertiaX * -1;
         }
-        
+
     },
 
     moveEntities: function () {
         //player
         this.player.playerY = this.player.playerY + this.player.inertiaY;
         this.player.playerX = this.player.playerX + this.player.inertiaX;
-        console.log(this.player.playerX);
-        console.log(this.player.playerY);
+        //console.log(this.player.playerX);
+        //console.log(this.player.playerY);
 
         //wanderers
         for (let i = 0; i < this.wanderers.length; i++) {
@@ -484,14 +561,16 @@ let Cell_Division = {
             this.wanderers[i].element.style.left = this.wanderers[i].wandererX + "px";
             this.wanderers[i].element.style.height = (this.wanderers[i].mass + 25) + "px";
             this.wanderers[i].element.style.width = (this.wanderers[i].mass + 25) + "px";
-            this.wanderers[i].element.style.zIndex = (this.powers[i].mass * 1);
-            if (this.wanderers[i].mass < this.player.mass - 2 ) {
+            this.wanderers[i].element.style.zIndex = (this.wanderers[i].mass * 1);
+            if (this.wanderers[i].mass < this.player.mass - 2 && this.wanderers[i].eaten == false) {
                 this.wanderers[i].element.style.border = "3px solid rgb(0, 0, 40)";
 
-            } else if (this.wanderers[i].mass > this.player.mass + 2 ) {
+            } else if (this.wanderers[i].mass > this.player.mass + 2 && this.wanderers[i].eaten == false) {
                 this.wanderers[i].element.style.border = "3px solid rgb(40, 0, 0)";
-            } else {
+            } else  if (this.wanderers[i].mass < this.player.mass + 2 && this.wanderers[i].mass > this.player.mass - 2 && this.wanderers[i].eaten == false) {
                 this.wanderers[i].element.style.border = "3px solid rgb(0, 0, 0)";
+            } else {
+                this.wanderers[i].element.style.border = "rgba(0, 0, 0, 0)";
             }
         }
 
@@ -501,11 +580,11 @@ let Cell_Division = {
             this.chasers[i].element.style.left = this.chasers[i].chaserX + "px";
             this.chasers[i].element.style.height = (this.chasers[i].mass + 25) + "px";
             this.chasers[i].element.style.width = (this.chasers[i].mass + 25) + "px";
-            this.chasers[i].element.style.zIndex = (this.powers[i].mass * 1);
-            if (this.chasers[i].mass < this.player.mass - 2 ) {
+            this.chasers[i].element.style.zIndex = (this.chasers[i].mass * 1);
+            if (this.chasers[i].mass < this.player.mass - 2) {
                 this.chasers[i].element.style.border = "3px solid rgb(0, 0, 40)";
 
-            } else if (this.chasers[i].mass > this.player.mass + 2 ) {
+            } else if (this.chasers[i].mass > this.player.mass + 2) {
                 this.chasers[i].element.style.border = "3px solid rgb(40, 0, 0)";
             } else {
                 this.chasers[i].element.style.border = "3px solid rgb(0, 0, 0)";
@@ -518,10 +597,10 @@ let Cell_Division = {
             this.powers[i].element.style.height = (this.powers[i].mass + 25) + "px";
             this.powers[i].element.style.width = (this.powers[i].mass + 25) + "px";
             this.powers[i].element.style.zIndex = (this.powers[i].mass * 1);
-            if (this.powers[i].mass < this.player.mass - 2 ) {
+            if (this.powers[i].mass < this.player.mass - 2) {
                 this.powers[i].element.style.border = "3px solid rgb(0, 0, 40)";
 
-            } else if (this.powers[i].mass > this.player.mass + 2 ) {
+            } else if (this.powers[i].mass > this.player.mass + 2) {
                 this.powers[i].element.style.border = "3px solid rgb(40, 0, 0)";
             } else {
                 this.powers[i].element.style.border = "3px solid rgb(0, 0, 0)";
