@@ -171,10 +171,10 @@ let Cell_Division = {
         this.challengeInertia();
         this.collision();
         this.playerMovement();
-        this.wanderersDectect();
+        this.wanderersDetect();
         this.wanderersMove();
         this.chasersMove();
-        this.chasersDectect();
+        this.chasersDetect();
         this.addTime();
         this.fade();
         this.spawners();
@@ -384,7 +384,7 @@ let Cell_Division = {
         console.log("Frame Time: " + this.frameTime);
     },
 
-    wanderersDectect: function () {
+    wanderersDetect: function () {
         for (let i = 0; i < this.wanderers.length; i++) {
             let wanderer = this.wanderers[i];
             let dx = wanderer.wandererX - this.player.playerX;
@@ -406,7 +406,7 @@ let Cell_Division = {
 
     },
 
-    chasersDectect: function () {
+    chasersDetect: function () {
         for (let i = 0; i < this.chasers.length; i++) {
             let chaser = this.chasers[i];
             let dx = chaser.chaserX - this.player.playerX;
@@ -608,16 +608,16 @@ let Cell_Division = {
     renderEntities: function () {
 
         //player
-        this.player.element.style.top = this.player.playerY + "px";
-        this.player.element.style.left = this.player.playerX + "px";
+        this.player.element.style.top = this.player.playerY - (this.player.mass/2) + "px";
+        this.player.element.style.left = this.player.playerX - (this.player.mass/2) + "px";
         this.player.element.style.height = (this.player.mass + 25) + "px";
         this.player.element.style.width = (this.player.mass + 25) + "px";
         this.player.element.style.zIndex = this.player.mass;
 
         //wanderers
         for (let i = 0; i < this.wanderers.length; i++) {
-            this.wanderers[i].element.style.top = this.wanderers[i].wandererY + "px";
-            this.wanderers[i].element.style.left = this.wanderers[i].wandererX + "px";
+            this.wanderers[i].element.style.top = this.wanderers[i].wandererY - (this.wanderers[i].mass/2) + "px";
+            this.wanderers[i].element.style.left = this.wanderers[i].wandererX - (this.wanderers[i].mass/2) + "px";
             this.wanderers[i].element.style.height = (this.wanderers[i].mass + 25) + "px";
             this.wanderers[i].element.style.width = (this.wanderers[i].mass + 25) + "px";
             this.wanderers[i].element.style.zIndex = this.wanderers[i].mass;
@@ -643,8 +643,8 @@ let Cell_Division = {
 
         //chasers
         for (let i = 0; i < this.chasers.length; i++) {
-            this.chasers[i].element.style.top = this.chasers[i].chaserY + "px";
-            this.chasers[i].element.style.left = this.chasers[i].chaserX + "px";
+            this.chasers[i].element.style.top = this.chasers[i].chaserY - (this.chasers[i].mass/2) + "px";
+            this.chasers[i].element.style.left = this.chasers[i].chaserX - (this.chasers[i].mass/2) + "px";
             this.chasers[i].element.style.height = (this.chasers[i].mass + 25) + "px";
             this.chasers[i].element.style.width = (this.chasers[i].mass + 25) + "px";
             this.chasers[i].element.style.zIndex = this.chasers[i].mass;
@@ -663,11 +663,11 @@ let Cell_Division = {
         }
         //power cells
         for (let i = 0; i < this.powers.length; i++) {
-            this.powers[i].element.style.top = this.powers[i].powerY + "px";
-            this.powers[i].element.style.left = this.powers[i].powerX + "px";
+            this.powers[i].element.style.top = this.powers[i].powerY - (this.powers[i].mass/2) + "px";
+            this.powers[i].element.style.left = this.powers[i].powerX - (this.powers[i].mass/2) + "px";
             this.powers[i].element.style.height = (this.powers[i].mass + 25) + "px";
             this.powers[i].element.style.width = (this.powers[i].mass + 25) + "px";
-            this.powers[i].element.style.zIndex = (this.powers[i].mass * 1);
+            this.powers[i].element.style.zIndex = this.powers[i].mass;
             if (this.powers[i].mass < this.player.mass - 2) {
                 this.powers[i].element.style.border = "3px solid rgb(0, 0, 40)";
 
