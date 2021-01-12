@@ -109,18 +109,18 @@ let Cell_Division = {
         wanderdiv.className = "wanderer";
         this.container.append(wanderdiv);
         let wanderer = {
-            mass: Math.random() * 50,
+            mass: Math.random() * 35,
             wandererX: this.powers[0].powerX,
             wandererY: this.powers[0].powerY,
             inertiaX: 0,
             inertiaY: 0,
             friction: 1,
-            maxSpeed: Math.random() * 1 + 2,
+            maxSpeed: Math.random() * 2 + 1,
             energy: 0,
             eaten: false,
             maxenergy: Math.random() * 250 + 125,
-            targetX: Math.random() * 250 + 125,
-            targetY: Math.random() * 500 + 125,
+            targetX: Math.random() * 1300,
+            targetY: Math.random() * 660,
             element: wanderdiv,
         }
         return wanderer;
@@ -131,14 +131,15 @@ let Cell_Division = {
         chaserdiv.className = "chaser";
         this.container.append(chaserdiv);
         let chaser = {
-            mass: Math.random() * 50,
-            chaserX: Math.random() * 250 + 125,
-            chaserY: Math.random() * 500 + 125,
+            mass: Math.random() * 85,
+            chaserX: this.powers[1].powerX,
+            chaserY: this.powers[1].powerY,
             inertiaX: 0,
             inertiaY: 0,
             friction: 1,
-            maxSpeed: Math.random() * 1 + 3,
+            maxSpeed: Math.random() * 2.5 + 1,
             energy: 0,
+            eaten: false,
             maxenergy: Math.random() * 250 + 25,
             targetX: Math.random() * 250 + 125,
             targetY: Math.random() * 500 + 125,
@@ -176,7 +177,21 @@ let Cell_Division = {
         this.chasersDectect();
         this.addTime();
         this.fade();
+        this.spawners();
         //this.player.mass = this.player.mass + 0.5;
+    },
+
+    spawners: function () {
+        if (this.usedTime > 111) {
+            if (this.player.mass < 75) {
+                let random = Math.ceil(Math.random() * 3);
+                if (this.usedTime % 10 == 0 && random <= 2) {
+                    this.wanderers.push(this.createWanderer());
+                } else if (this.usedTime % 10 == 0 && random == 3) {
+                    this.chasers.push(this.createChaser());
+                }
+            }
+        }
     },
 
     fade: function () {
@@ -201,7 +216,7 @@ let Cell_Division = {
             }
 
         }
-        if (this.usedTime > 3 && this.usedTime < 6.1) {                                               //Starting Tutorial//
+        if (this.usedTime > 3 && this.usedTime < 6.1) {                                               //Starting Tutorial// (Remember to make a skip button if we have time.)
             this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 3) / 3) + ")";
         }
         if (this.usedTime > 9 && this.usedTime < 12.1) {
@@ -227,7 +242,7 @@ let Cell_Division = {
         }
         if (this.usedTime == 33) {
             this.wanderers.push(this.createWanderer());
-            this.wanderers[0].mass = 6;
+            this.wanderers[0].mass = 4;
         }
         if (this.usedTime > 36 && this.usedTime < 39.1) {
             this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 36) / 3) + ")";
@@ -262,15 +277,45 @@ let Cell_Division = {
         }
         if (this.usedTime == 64) {
             this.wanderers.push(this.createWanderer());
-            this.wanderers[1].mass = 1;
+            this.wanderers[1].mass = 2;
         }
         if (this.usedTime == 67) {
             this.wanderers.push(this.createWanderer());
             this.wanderers[2].mass = 10;
         }
+        if (this.usedTime > 72 && this.usedTime < 75.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>Once you've done that, you'll notice you have become bigger</h2> <h2>You are now big enough to eat the one that was black before</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 72) / 3) + ")";
+        }
+        if (this.usedTime > 78 && this.usedTime < 81.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 78) / 3) + ")";
+        }
+        if (this.usedTime > 81 && this.usedTime < 84.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>Your goal here is quite simple.</h2> <h2>Become big enough to destroy the three cells on the right.</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 81) / 3) + ")";
+        }
+        if (this.usedTime > 87 && this.usedTime < 90.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 87) / 3) + ")";
+        }
+        if (this.usedTime > 90 && this.usedTime < 93.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>Good Luck.</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 90) / 3) + ")";
+        }
+        if (this.usedTime > 96 && this.usedTime < 99.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 87) / 3) + ")";
+        }
+        if (this.usedTime == 100) {
+            document.getElementById("tutorial").innerHTML = "<h1>Now Go</h1>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, 1)";
+        }
+        if (this.usedTime == 103) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, 0)";
+        }
     },
 
     collision: function () {
+
+        //WANDERERS
         for (let i = 0; i < this.wanderers.length; i++) {
             let wanderer = this.wanderers[i];
             let dx = wanderer.wandererX - this.player.playerX;
@@ -280,24 +325,38 @@ let Cell_Division = {
             if (distance < wanderer.mass + this.player.mass + 25) {
                 console.log("entity collided with");
                 if (wanderer.mass < this.player.mass - 2 && wanderer.eaten == false) {
-                    this.player.mass = this.player.mass + wanderer.mass
-                    wanderer.element.style.backgroundColor = "rgba(0, 0, 0, 0)";                                 //MAKE THIS MORE EFFICIENT (make it actually delete them instead of just hiding them)
-                    wanderer.element.style.border = "rgba(0, 0, 0, 0)";
+                    if (this.player.mass <= 8) {
+                        this.player.mass = this.player.mass + wanderer.mass
+                    }
+                    if (this.player.mass > 8) {
+                        this.player.mass = this.player.mass + (wanderer.mass * 2) / this.player.mass
+                    }
+                    //this.container.children[i].remove();
                     wanderer.eaten = true;
-                    
+
                 } else if (this.wanderers[i].mass > this.player.mass + 2) {
-                    this.wanderers[i].element.style.border = "3px solid rgb(40, 0, 0)";
+                    this.wanderers[i].element.style.border = "3px solid rgb(255, 0, 0)";  //PLAYER DEATH
                 }
             }
         }
+
+        //CHASERS
         for (let i = 0; i < this.chasers.length; i++) {
             let chaser = this.chasers[i];
             let dx = chaser.chaserX - this.player.playerX;
             let dy = chaser.chaserY - this.player.playerY;
             let distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < wanderer.mass + this.player.mass + 10) {
+            if (distance < chaser.mass + this.player.mass + 25) {
                 console.log("entity collided with");
+                if (chaser.mass < this.player.mass - 2 && chaser.eaten == false) {
+                    this.player.mass = this.player.mass + (chaser.mass * 2) / this.player.mass
+                    //this.container.children[i].remove();
+                    chaser.eaten = true;
+
+                } else if (this.chasers[i].mass > this.player.mass + 2) {
+                    this.chasers[i].element.style.border = "3px solid rgb(255, 0, 0)";  //PLAYER DEATH
+                }
             }
         }
     },
@@ -402,10 +461,10 @@ let Cell_Division = {
                 wanderer.targetY = Math.random() * (660 - (wanderer.mass * 2)) + wanderer.mass;                  //HERE Math.random() * 
                 wanderer.energy = 0;
             }
-            console.log(wanderer.inertiaY);
-            console.log(wanderer.inertiaX);
-            console.log(wanderer.targetX)
-            console.log(wanderer.wanderX - wanderer.targetX);
+            //console.log(this.wanderer.inertiaY);
+            //console.log(this.wanderer.inertiaX);
+            //console.log(this.wanderer.targetX)
+            //console.log(this.wanderer.wanderX - wanderer.targetX);
         }
 
     },
@@ -511,10 +570,10 @@ let Cell_Division = {
             }
         }
 
-        if (this.player.playerY >= 665 && this.player.inertiaY > 0) {     //Bounce on ceiling and floor
+        if (this.player.playerY >= 670 - this.player.mass && this.player.inertiaY > 0) {     //Bounce on ceiling and floor
             this.player.inertiaY = this.player.inertiaY * -1;
         }
-        if (this.player.playerX >= 1465 && this.player.inertiaX > 0) {     //Bounce on both walls
+        if (this.player.playerX >= 1470 - this.player.mass && this.player.inertiaX > 0) {     //Bounce on both walls
             this.player.inertiaX = this.player.inertiaX * -1;
         }
         if (this.player.playerY <= 0 && this.player.inertiaY < 0) {     //Bounce on ceiling and floor
@@ -553,7 +612,7 @@ let Cell_Division = {
         this.player.element.style.left = this.player.playerX + "px";
         this.player.element.style.height = (this.player.mass + 25) + "px";
         this.player.element.style.width = (this.player.mass + 25) + "px";
-        this.player.element.style.zIndex = (this.player.mass * 1);
+        this.player.element.style.zIndex = this.player.mass;
 
         //wanderers
         for (let i = 0; i < this.wanderers.length; i++) {
@@ -561,16 +620,24 @@ let Cell_Division = {
             this.wanderers[i].element.style.left = this.wanderers[i].wandererX + "px";
             this.wanderers[i].element.style.height = (this.wanderers[i].mass + 25) + "px";
             this.wanderers[i].element.style.width = (this.wanderers[i].mass + 25) + "px";
-            this.wanderers[i].element.style.zIndex = (this.wanderers[i].mass * 1);
+            this.wanderers[i].element.style.zIndex = this.wanderers[i].mass;
             if (this.wanderers[i].mass < this.player.mass - 2 && this.wanderers[i].eaten == false) {
-                this.wanderers[i].element.style.border = "3px solid rgb(0, 0, 40)";
-
+                this.wanderers[i].element.style.border = "3px solid rgba(0, 0, 40, 1)";
+                this.wanderers[i].element.style.backgroundColor = "rgba(0, 83, 14, 1);";
             } else if (this.wanderers[i].mass > this.player.mass + 2 && this.wanderers[i].eaten == false) {
-                this.wanderers[i].element.style.border = "3px solid rgb(40, 0, 0)";
-            } else  if (this.wanderers[i].mass < this.player.mass + 2 && this.wanderers[i].mass > this.player.mass - 2 && this.wanderers[i].eaten == false) {
-                this.wanderers[i].element.style.border = "3px solid rgb(0, 0, 0)";
+                console.log("here");
+                this.wanderers[i].element.style.border = "3px solid rgba(40, 0, 0, 1)";
+                this.wanderers[i].element.style.backgroundColor = "rgba(0, 83, 14, 1);";
+                console.log("but not here");
+            } else if (this.wanderers[i].mass < this.player.mass + 2 && this.wanderers[i].mass > this.player.mass - 2 && this.wanderers[i].eaten == false) {
+                this.wanderers[i].element.style.border = "3px solid rgba(0, 0, 0, 1)";
+                this.wanderers[i].element.style.backgroundColor = "3px solid rgba(0, 83, 14, 1);";  //WHAT IS GOING ON HERE??!??!? Why does the color not change?
+                console.log(this.wanderers[i].element.style.backgroundColor);        //why is the border special?????
+                console.log(this.wanderers[i].element.style.border); //this makes a good 0 sense.
             } else {
                 this.wanderers[i].element.style.border = "rgba(0, 0, 0, 0)";
+                this.wanderers[i].element.style.backgroundColor = "rgba(0, 83, 14, 0.2)";
+                this.wanderers[i].element.style.zIndex = 0;
             }
         }
 
@@ -580,14 +647,18 @@ let Cell_Division = {
             this.chasers[i].element.style.left = this.chasers[i].chaserX + "px";
             this.chasers[i].element.style.height = (this.chasers[i].mass + 25) + "px";
             this.chasers[i].element.style.width = (this.chasers[i].mass + 25) + "px";
-            this.chasers[i].element.style.zIndex = (this.chasers[i].mass * 1);
-            if (this.chasers[i].mass < this.player.mass - 2) {
+            this.chasers[i].element.style.zIndex = this.chasers[i].mass;
+            if (this.chasers[i].mass < this.player.mass - 2 && this.chasers[i].eaten == false) {
                 this.chasers[i].element.style.border = "3px solid rgb(0, 0, 40)";
 
-            } else if (this.chasers[i].mass > this.player.mass + 2) {
+            } else if (this.chasers[i].mass > this.player.mass + 2 && this.chasers[i].eaten == false) {
                 this.chasers[i].element.style.border = "3px solid rgb(40, 0, 0)";
-            } else {
+            } else if (this.chasers[i].mass < this.player.mass + 2 && this.chasers[i].mass > this.player.mass - 2 && this.chasers[i].eaten == false) {
                 this.chasers[i].element.style.border = "3px solid rgb(0, 0, 0)";
+            } else {
+                this.chasers[i].element.style.border = "rgba(0, 0, 0, 0)";
+                this.chasers[i].element.style.backgroundColor = "rgba(83, 0, 0, 0.2)";
+                this.chasers[i].element.style.zIndex = 0;
             }
         }
         //power cells

@@ -5,7 +5,7 @@ html {
 
 body { 
     font-family: sans-serif;
-    background-color: dimgray;
+    background-color: rgb(85, 8, 8);
     color: #333; 
 }
 
@@ -44,7 +44,7 @@ blue {
     border: 3px solid black;
     position: relative;
     margin: auto;
-    background: gray;
+    background: rgb(128, 95, 95);
     font-size:1.6em;
     text-align: center;
 }
@@ -122,11 +122,11 @@ blue {
     border-radius: 50%;
     width: 100px;
     height: 100px;
-    background-color: rgb(0, 83, 14);
-    border: 3px solid rgb(0, 0, 0);
+    background-color: rgba(0, 83, 14, 1);
+    border: 3px solid rgba(0, 0, 0, 0);
     position: absolute;
-    top: 250px;
-    left: 500px;
+    top: -250px;
+    left: -500px;
 }
 
 .chaser {
@@ -136,8 +136,8 @@ blue {
     background-color: rgb(83, 0, 0);
     border: 3px solid rgb(0, 0, 0);
     position: absolute;
-    top: 250px;
-    left: 500px;
+    top: -250px;
+    left: -500px;
 }
 
 .power {
