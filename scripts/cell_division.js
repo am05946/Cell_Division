@@ -298,14 +298,14 @@ let Cell_Division = {
             this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 87) / 3) + ")";
         }
         if (this.usedTime > 90 && this.usedTime < 93.1) {
-            document.getElementById("tutorial").innerHTML = "<h2>Good Luck.</h2>";
+            document.getElementById("tutorial").innerHTML = "<h2>Good Luck</h2>";
             this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 90) / 3) + ")";
         }
         if (this.usedTime > 96 && this.usedTime < 99.1) {
             this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 87) / 3) + ")";
         }
         if (this.usedTime == 100) {
-            document.getElementById("tutorial").innerHTML = "<h1>Now Go</h1>";
+            document.getElementById("tutorial").innerHTML = "<h1>Now Go!</h1>";
             this.tutorialText.style.color = "rgba(0, 0, 0, 1)";
         }
         if (this.usedTime == 103) {
