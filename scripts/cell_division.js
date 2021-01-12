@@ -1,30 +1,33 @@
 let Cell_Division = {
 
     animation1: undefined,
+    player: undefined,
     wanderers: [],
     chasers: [],
     spitters: [],
-    bloodcells: [],
-    pscore: document.getElementById("score_box").textContent,
-    container: document.getElementById("playing_screen"), 
-    player: undefined,
+    powers: [],
+    wanderzone: document.getElementById("wander_zone"),
+    splitzone: document.getElementById("split_zone"),
+    chaserzone: document.getElementById("chaser_zone"),
+    startbutton: document.getElementById("start_button"),
+    container: document.getElementById("playing_screen"),
+    tutorialText: document.getElementById("tutorial"),
     usedTime: 0,
     frameTime: 0,
-    scoreBoard: 0,
-    highScore: 0,
+    gamestart: false,
+
 
     init: function () {                                                       //----- Player Key Press Detection -----//                      
         this.player = this.createPlayer();     //Create player
-        for (let i = 0; i < 10; i++) {
-        this.wanderers.push(this.createWanderer());     //Create test wanderer
-        }
         for (let i = 0; i < 3; i++) {
-            this.chasers.push(this.createChaser());     //Create test wanderer
-            }
+            this.powers.push(this.createPower())
+        }
+
+
         window.onkeydown = function (event) {
             if (event.keyCode == 87) {     //W  (Move up)
                 this.player.up = true;
-                console.log("W was pressed");
+                //console.log("W was pressed");
             }
             if (event.keyCode == 65) {    //A  (Move left)
                 this.player.left = true;
@@ -37,13 +40,20 @@ let Cell_Division = {
             }
             //console.log(this.inertiaX);
             //console.log(this.inertiaY);
-            console.log("Test");
+            //console.log("Test");
+        }.bind(Cell_Division);
+
+        this.startbutton.onclick = function (event) {
+            if (this.gamestart == false) {
+                this.startGame();
+                this.gamestart = true;
+            }
         }.bind(Cell_Division);
 
         window.onkeyup = function (event) {
             if (event.keyCode == 87) {    //!W  (Stop moving Move up)
                 this.player.up = false;
-                console.log("W was released");
+                //console.log("W was released");
             }
             if (event.keyCode == 65) {    //!A  (Stop moving Move left)
                 this.player.left = false;
@@ -56,13 +66,20 @@ let Cell_Division = {
             }
             //console.log(this.inertiaX);
             //console.log(this.inertiaY);
-            console.log("Test");
+            //console.log("Test");
         }.bind(Cell_Division);
 
+    },
+
+    startGame: function () {
         this.startAnimation();
         console.log("started animation");
-
-
+        this.powers[1].powerY = 285;
+        this.powers[2].powerY = 495;
+        this.powers[1].powerX = this.powers[1].powerX - 25;
+        this.powers[2].powerX = this.powers[2].powerX - 50
+        this.powers[1].mass = 100;
+        this.powers[2].mass = 150;
     },
 
     createPlayer: function () {
@@ -71,12 +88,12 @@ let Cell_Division = {
         this.container.append(playerdiv);
         let player = {
             playerX: 250,
-            playerY: 500,
+            playerY: 350,
             inertiaX: 0,
             inertiaY: 0,
             maxSpeed: 5,
-            friction: 5,
-            speed: 5,
+            friction: 7,  //DO NOT TURN THIS TO A NEGATIVE VALUE (Or really any value below 1)
+            speed: 0.4,
             mass: 5,
             right: false,
             down: false,
@@ -92,17 +109,18 @@ let Cell_Division = {
         wanderdiv.className = "wanderer";
         this.container.append(wanderdiv);
         let wanderer = {
-            mass: Math.random() * 50,
-            wandererX: Math.random() * 250 + 125,
-            wandererY: Math.random() * 500 + 125,
+            mass: Math.random() * 35,
+            wandererX: this.powers[0].powerX,
+            wandererY: this.powers[0].powerY,
             inertiaX: 0,
             inertiaY: 0,
             friction: 1,
-            maxSpeed:  Math.random() * 1 + 2,
+            maxSpeed: Math.random() * 2 + 1,
             energy: 0,
+            eaten: false,
             maxenergy: Math.random() * 250 + 125,
-            targetX: Math.random() * 250 + 125,
-            targetY: Math.random() * 500 + 125,
+            targetX: Math.random() * 1300,
+            targetY: Math.random() * 660,
             element: wanderdiv,
         }
         return wanderer;
@@ -113,20 +131,34 @@ let Cell_Division = {
         chaserdiv.className = "chaser";
         this.container.append(chaserdiv);
         let chaser = {
-            mass: Math.random() * 50,
-            chaserX: Math.random() * 250 + 125,
-            chaserY: Math.random() * 500 + 125,
+            mass: Math.random() * 85,
+            chaserX: this.powers[1].powerX,
+            chaserY: this.powers[1].powerY,
             inertiaX: 0,
             inertiaY: 0,
             friction: 1,
-            maxSpeed:  Math.random() * 1 + 3,
+            maxSpeed: Math.random() * 2.5 + 1,
             energy: 0,
-            maxenergy: Math.random() * 250 + 100,
+            eaten: false,
+            maxenergy: Math.random() * 250 + 25,
             targetX: Math.random() * 250 + 125,
             targetY: Math.random() * 500 + 125,
             element: chaserdiv,
         }
         return chaser;
+    },
+
+    createPower: function () {
+        let powerdiv = document.createElement("div");
+        powerdiv.className = "power";
+        this.container.append(powerdiv);
+        let power = {
+            mass: 50,
+            powerX: 1345,
+            powerY: 75,
+            element: powerdiv,
+        }
+        return power;
     },
 
     startAnimation: function () {
@@ -144,10 +176,146 @@ let Cell_Division = {
         this.chasersMove();
         this.chasersDectect();
         this.addTime();
-        this.score();
+        this.fade();
+        this.spawners();
+        //this.player.mass = this.player.mass + 0.5;
+    },
+
+    spawners: function () {
+        if (this.usedTime > 111) {
+            if (this.player.mass < 75) {
+                let random = Math.ceil(Math.random() * 3);
+                if (this.usedTime % 10 == 0 && random <= 2) {
+                    this.wanderers.push(this.createWanderer());
+                } else if (this.usedTime % 10 == 0 && random == 3) {
+                    this.chasers.push(this.createChaser());
+                }
+            }
+        }
+    },
+
+    fade: function () {
+        if (this.usedTime < 3.1) {
+            this.startbutton.style.color = "rgba(0, 122, 170, " + (1 - this.usedTime / 3) + ")";
+            this.startbutton.style.backgroundColor = "rgba(0, 70, 100, " + (1 - this.usedTime / 3) + ")";
+            this.startbutton.style.borderTopColor = "rgba(0, 95, 136, " + (1 - this.usedTime / 3) + ")";
+            this.startbutton.style.borderLeftColor = "rgba(0, 95, 136, " + (1 - this.usedTime / 3) + ")";
+            this.startbutton.style.borderRightColor = "rgba(0, 50, 71, " + (1 - this.usedTime / 3) + ")";
+            this.startbutton.style.borderBottomColor = "rgba(0, 50, 71, " + (1 - this.usedTime / 3) + ")";
+            this.player.element.style.backgroundColor = "rgba(255, 255, 255, " + (this.usedTime / 3) + ")";
+            this.player.element.style.border = "3px solid rgba(0, 0, 0, " + (this.usedTime / 3) + ")";
+            this.wanderzone.style.backgroundColor = "rgba(0,255,0, " + (this.usedTime / 10) + ")";
+            this.wanderzone.style.border = "3px dashed rgba(0,255,0, " + (this.usedTime / 6) + ")";
+            this.splitzone.style.backgroundColor = "rgba(255,255,0, " + (this.usedTime / 10) + ")";
+            this.splitzone.style.border = "3px dashed rgba(255,255,0, " + (this.usedTime / 6) + ")";
+            this.chaserzone.style.backgroundColor = "rgba(255,0,0, " + (this.usedTime / 10) + ")";
+            this.chaserzone.style.border = "3px dashed rgba(255,0,0, " + (this.usedTime / 6) + ")";
+            for (i = 0; i < this.powers.length; i++) {
+                this.powers[i].element.style.backgroundColor = "rgba(6, 15, 20, " + (this.usedTime / 3) + ")";
+                this.powers[i].element.style.border = "3px solid rgba(40, 0, 0, " + (this.usedTime / 3) + ")";
+            }
+
+        }
+        if (this.usedTime > 3 && this.usedTime < 6.1) {                                               //Starting Tutorial// (Remember to make a skip button if we have time.)
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 3) / 3) + ")";
+        }
+        if (this.usedTime > 9 && this.usedTime < 12.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 9) / 3) + ")";
+        }
+        if (this.usedTime > 12 && this.usedTime < 15.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>You are a white blood cell</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 12) / 3) + ")";
+        }
+        if (this.usedTime > 18 && this.usedTime < 21.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 18) / 3) + ")";
+        }
+        if (this.usedTime > 21 && this.usedTime < 24.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>and your job is to eliminate viruses.</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 21) / 3) + ")";
+        }
+        if (this.usedTime > 27 && this.usedTime < 30.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 27) / 3) + ")";
+        }
+        if (this.usedTime > 30 && this.usedTime < 33.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>Here comes one now.</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 30) / 3) + ")";
+        }
+        if (this.usedTime == 33) {
+            this.wanderers.push(this.createWanderer());
+            this.wanderers[0].mass = 4;
+        }
+        if (this.usedTime > 36 && this.usedTime < 39.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 36) / 3) + ")";
+        }
+        if (this.usedTime > 39 && this.usedTime < 42.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>This virus has a black outline as it is around your size.</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 39) / 3) + ")";
+        }
+        if (this.usedTime > 42 && this.usedTime < 45.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 42) / 3) + ")";
+        }
+        if (this.usedTime > 45 && this.usedTime < 48.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>Viruses bigger than you will have a <red>red</red> outline</h2> <h2>while viruses smaller than you will have a <blue>blue</blue> outline</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 45) / 3) + ")";
+        }
+        if (this.usedTime > 51 && this.usedTime < 54.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 51) / 3) + ")";
+        }
+        if (this.usedTime > 54 && this.usedTime < 57.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>You can consume viruses with a <blue>blue</blue> outline</h2> <h2>and viruses with a <red>red</red> outline can consume you</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 54) / 3) + ")";
+        }
+        if (this.usedTime > 60 && this.usedTime < 63.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 60) / 3) + ")";
+        }
+        if (this.usedTime > 63 && this.usedTime < 66.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>Try to consume this <blue>blue</blue> one here</h2> <h2>(and avoid the big <red>red</red> one)</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 63) / 3) + ")";
+        }
+        if (this.usedTime > 69 && this.usedTime < 72.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 69) / 3) + ")";
+        }
+        if (this.usedTime == 64) {
+            this.wanderers.push(this.createWanderer());
+            this.wanderers[1].mass = 2;
+        }
+        if (this.usedTime == 67) {
+            this.wanderers.push(this.createWanderer());
+            this.wanderers[2].mass = 10;
+        }
+        if (this.usedTime > 72 && this.usedTime < 75.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>Once you've done that, you'll notice you have become bigger</h2> <h2>You are now big enough to eat the one that was black before</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 72) / 3) + ")";
+        }
+        if (this.usedTime > 78 && this.usedTime < 81.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 78) / 3) + ")";
+        }
+        if (this.usedTime > 81 && this.usedTime < 84.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>Your goal here is quite simple.</h2> <h2>Become big enough to destroy the three cells on the right.</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 81) / 3) + ")";
+        }
+        if (this.usedTime > 87 && this.usedTime < 90.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 87) / 3) + ")";
+        }
+        if (this.usedTime > 90 && this.usedTime < 93.1) {
+            document.getElementById("tutorial").innerHTML = "<h2>Good Luck</h2>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 90) / 3) + ")";
+        }
+        if (this.usedTime > 96 && this.usedTime < 99.1) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 87) / 3) + ")";
+        }
+        if (this.usedTime == 100) {
+            document.getElementById("tutorial").innerHTML = "<h1>Now Go!</h1>";
+            this.tutorialText.style.color = "rgba(0, 0, 0, 1)";
+        }
+        if (this.usedTime == 103) {
+            this.tutorialText.style.color = "rgba(0, 0, 0, 0)";
+        }
     },
 
     collision: function () {
+
+        //WANDERERS
         for (let i = 0; i < this.wanderers.length; i++) {
             let wanderer = this.wanderers[i];
             let dx = wanderer.wandererX - this.player.playerX;
@@ -156,16 +324,39 @@ let Cell_Division = {
 
             if (distance < wanderer.mass + this.player.mass + 25) {
                 console.log("entity collided with");
+                if (wanderer.mass < this.player.mass - 2 && wanderer.eaten == false) {
+                    if (this.player.mass <= 8) {
+                        this.player.mass = this.player.mass + wanderer.mass
+                    }
+                    if (this.player.mass > 8) {
+                        this.player.mass = this.player.mass + (wanderer.mass * 2) / this.player.mass
+                    }
+                    //this.container.children[i].remove();
+                    wanderer.eaten = true;
+
+                } else if (this.wanderers[i].mass > this.player.mass + 2) {
+                    this.wanderers[i].element.style.border = "3px solid rgb(255, 0, 0)";  //PLAYER DEATH
+                }
             }
         }
+
+        //CHASERS
         for (let i = 0; i < this.chasers.length; i++) {
             let chaser = this.chasers[i];
             let dx = chaser.chaserX - this.player.playerX;
             let dy = chaser.chaserY - this.player.playerY;
             let distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < wanderer.mass + this.player.mass + 25) {
+            if (distance < chaser.mass + this.player.mass + 25) {
                 console.log("entity collided with");
+                if (chaser.mass < this.player.mass - 2 && chaser.eaten == false) {
+                    this.player.mass = this.player.mass + (chaser.mass * 2) / this.player.mass
+                    //this.container.children[i].remove();
+                    chaser.eaten = true;
+
+                } else if (this.chasers[i].mass > this.player.mass + 2) {
+                    this.chasers[i].element.style.border = "3px solid rgb(255, 0, 0)";  //PLAYER DEATH
+                }
             }
         }
     },
@@ -188,18 +379,9 @@ let Cell_Division = {
 
     addTime: function () {
         this.frameTime = this.frameTime + 1;
-        this.usedTime = this.frameTime/40;
-        console.log("Time passed: " + this.usedTime);
-        console.log("Real time passed: " + this.frameTime);
-    },
-
-    score: function () {
-        this.scoreBoard = Math.round(this.player.mass * this.usedTime);
-        console.log("This is the current Score: " + this.scoreBoard);
-        if(this.scoreBoard > this.highScore);
-        this.highScore = this.scoreBoard;
-        console.log("This is the HighScore: " + this.highScore);
-
+        this.usedTime = this.frameTime / 40;
+        console.log("Used Time: " + this.usedTime);
+        console.log("Frame Time: " + this.frameTime);
     },
 
     wanderersDectect: function () {
@@ -208,10 +390,10 @@ let Cell_Division = {
             let dx = wanderer.wandererX - this.player.playerX;
             let dy = wanderer.wandererY - this.player.playerY;
             let distance = Math.sqrt(dx * dx + dy * dy);
-            console.log("selected");
+            //console.log("selected");
 
             if (distance < wanderer.mass + this.player.mass + 100) {
-                console.log("entity detected");
+                //console.log("entity detected");
 
                 if (wanderer.mass > this.player.mass + 2) {
                     wanderer.targetX = this.player.playerX;
@@ -279,10 +461,10 @@ let Cell_Division = {
                 wanderer.targetY = Math.random() * (660 - (wanderer.mass * 2)) + wanderer.mass;                  //HERE Math.random() * 
                 wanderer.energy = 0;
             }
-            console.log(wanderer.inertiaY);
-            console.log(wanderer.inertiaX);
-            console.log(wanderer.targetX)
-            console.log(wanderer.wanderX - wanderer.targetX);
+            //console.log(this.wanderer.inertiaY);
+            //console.log(this.wanderer.inertiaX);
+            //console.log(this.wanderer.targetX)
+            //console.log(this.wanderer.wanderX - wanderer.targetX);
         }
 
     },
@@ -330,82 +512,85 @@ let Cell_Division = {
 
     playerMovement: function () {                                     //----- Player Movement -----//
 
-        //The D key
-        if (this.player.right == true) {    //Is D held down?
-            if (this.player.inertiaX <= this.player.maxSpeed) {    //Speed up if the inertia isn't already at Max
-                this.player.inertiaX = this.player.inertiaX + (this.player.speed / this.player.friction);     //Add the inertia to the players speed divided by the players friction
-            }
-        }
-        if (this.player.right == false) {    //If the player isn't holding down D
-            while (this.player.inertiaX > 0) {    //Repeat while player inertia is greater than 0 and player is inactive
-                this.player.inertiaX = this.player.inertiaX - (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
-                if (this.player.inertiaX < 0.01) {    //If the players inertia gets close enough to 0, just set it to 0
-                    this.player.inertiaX = 0;
-                }
-            }
-        }
-
         //The A key
-        if (this.player.left == true) {    //Is A held down?
-            if (this.player.inertiaX >= -this.player.maxSpeed) {    //Speed up if the inertia isn't already at Max
-                this.player.inertiaX = this.player.inertiaX - (this.player.speed / this.player.friction);     //Add the inertia to the players speed divided by the players friction
+        if (this.player.left == true) {    //Is W held down?
+            if (this.player.inertiaX > -this.player.maxSpeed) {
+                this.player.inertiaX = this.player.inertiaX - this.player.speed
+            } else if (this.player.inertiaX <= -this.player.maxSpeed) {
+                this.player.inertiaX = -this.player.maxSpeed
+            }
+        } else if (this.player.inertiaX < 0) {
+            this.player.inertiaX = this.player.inertiaX + this.player.speed
+            if (this.player.inertiaX > -1 && this.player.right == false) {
+                this.player.inertiaX = 0;
             }
         }
-        if (this.player.left == false) {    //If the player isn't holding down A
-            while (this.player.inertiaX < 0) {    //Repeat while player inertia is greater than 0 and player is inactive
-                this.player.inertiaX = this.player.inertiaX + (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
-                if (this.player.inertiaX > -0.01) {    //If the players inertia gets close enough to 0, just set it to 0
-                    this.player.inertiaX = 0;
-                }
+        //console.log("Xinertia: " + this.player.inertiaX);
+
+        //The D key
+        if (this.player.right == true) {    //Is W held down?
+            if (this.player.inertiaX < this.player.maxSpeed) {
+                this.player.inertiaX = this.player.inertiaX + this.player.speed
+            } else if (this.player.inertiaX >= this.player.maxSpeed) {
+                this.player.inertiaX = this.player.maxSpeed
+            }
+        } else if (this.player.inertiaX > 0) {
+            this.player.inertiaX = this.player.inertiaX - this.player.speed
+            if (this.player.inertiaX < 1 && this.player.left == false) {
+                this.player.inertiaX = 0;
             }
         }
 
         //The W key
         if (this.player.up == true) {    //Is W held down?
-            console.log("Forward March!");
-            if (this.player.inertiaY <= this.player.maxSpeed) {    //Speed up if the inertia isn't already at Max
-                console.log("step on the gas");
-                this.player.inertiaY = this.player.inertiaY + (this.player.speed / this.player.friction);     //Add the inertia to the players speed divided by the players friction
+            if (this.player.inertiaY > -this.player.maxSpeed) {
+                this.player.inertiaY = this.player.inertiaY - this.player.speed
+            } else if (this.player.inertiaY <= -this.player.maxSpeed) {
+                this.player.inertiaY = -this.player.maxSpeed
+            }
+        } else if (this.player.inertiaY < 0) {
+            this.player.inertiaY = this.player.inertiaY + this.player.speed
+            if (this.player.inertiaY > -1 && this.player.down == false) {
+                this.player.inertiaY = 0;
             }
         }
-        if (this.player.up == false) {    //If the player isn't holding down W
-            while (this.player.inertiaY > 0) {    //Repeat while player inertia is greater than 0 and player is inactive
-                this.player.inertiaY = this.player.inertiaY - (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
-                if (this.player.inertiaY < 0.01) {    //If the players inertia gets close enough to 0, just set it to 0
-                    this.player.inertiaY = 0;
-                }
-            }
-        }
+        //console.log("Yinertia: " + this.player.inertiaY);
 
         //The S key
-        if (this.player.down == true) {    //Is S held down?
-            if (this.player.inertiaY >= -this.player.maxSpeed) {    //Speed up if the inertia isn't already at Max
-                this.player.inertiaY = this.player.inertiaY - (this.player.speed / this.player.friction);     //Add the inertia to the players speed divided by the players friction
+        if (this.player.down == true) {    //Is W held down?
+            if (this.player.inertiaY < this.player.maxSpeed) {
+                this.player.inertiaY = this.player.inertiaY + this.player.speed
+            } else if (this.player.inertiaY >= this.player.maxSpeed) {
+                this.player.inertiaY = this.player.maxSpeed
             }
-        }
-        if (this.player.down == false) {    //If the player isn't holding down S
-            while (this.player.inertiaY < 0) {    //Repeat while player inertia is greater than 0 and player is inactive
-                this.player.inertiaY = this.player.inertiaY + (this.player.speed / this.player.friction);    //Slowely take away from the inertia when inactive
-                if (this.player.inertiaY > -0.01) {    //If the players inertia gets close enough to 0, just set it to 0
-                    this.player.inertiaY = 0;
-                }
+        } else if (this.player.inertiaY > 0) {
+            this.player.inertiaY = this.player.inertiaY - this.player.speed
+            if (this.player.inertiaY < 1 && this.player.up == false) {
+                this.player.inertiaY = 0;
             }
         }
 
-        if (this.player.playerY >= 665 || this.player.playerY <= 0) {     //Bounce on ceiling and floor
+        if (this.player.playerY >= 670 - this.player.mass && this.player.inertiaY > 0) {     //Bounce on ceiling and floor
             this.player.inertiaY = this.player.inertiaY * -1;
         }
-        if (this.player.playerX >= 1465 || this.player.playerX <= 0) {     //Bounce on both walls
+        if (this.player.playerX >= 1470 - this.player.mass && this.player.inertiaX > 0) {     //Bounce on both walls
             this.player.inertiaX = this.player.inertiaX * -1;
         }
+        if (this.player.playerY <= 0 && this.player.inertiaY < 0) {     //Bounce on ceiling and floor
+            this.player.inertiaY = this.player.inertiaY * -1;
+        }
+        if (this.player.playerX <= 0 && this.player.inertiaX < 0) {     //Bounce on both walls
+            this.player.inertiaX = this.player.inertiaX * -1;
+        }
+
     },
 
     moveEntities: function () {
         //player
-        this.player.playerY = this.player.playerY - this.player.inertiaY;
+        this.player.playerY = this.player.playerY + this.player.inertiaY;
         this.player.playerX = this.player.playerX + this.player.inertiaX;
-        console.log(this.player.playerX);
-        console.log(this.player.playerY);
+        //console.log(this.player.playerX);
+        //console.log(this.player.playerY);
 
         //wanderers
         for (let i = 0; i < this.wanderers.length; i++) {
@@ -427,6 +612,7 @@ let Cell_Division = {
         this.player.element.style.left = this.player.playerX + "px";
         this.player.element.style.height = (this.player.mass + 25) + "px";
         this.player.element.style.width = (this.player.mass + 25) + "px";
+        this.player.element.style.zIndex = this.player.mass;
 
         //wanderers
         for (let i = 0; i < this.wanderers.length; i++) {
@@ -434,13 +620,24 @@ let Cell_Division = {
             this.wanderers[i].element.style.left = this.wanderers[i].wandererX + "px";
             this.wanderers[i].element.style.height = (this.wanderers[i].mass + 25) + "px";
             this.wanderers[i].element.style.width = (this.wanderers[i].mass + 25) + "px";
-            if (this.wanderers[i].mass < this.player.mass - 2 ) {
-                this.wanderers[i].element.style.border = "3px solid rgb(0, 0, 40)";
-
-            } else if (this.wanderers[i].mass > this.player.mass + 2 ) {
-                this.wanderers[i].element.style.border = "3px solid rgb(40, 0, 0)";
+            this.wanderers[i].element.style.zIndex = this.wanderers[i].mass;
+            if (this.wanderers[i].mass < this.player.mass - 2 && this.wanderers[i].eaten == false) {
+                this.wanderers[i].element.style.border = "3px solid rgba(0, 0, 40, 1)";
+                this.wanderers[i].element.style.backgroundColor = "rgba(0, 83, 14, 1);";
+            } else if (this.wanderers[i].mass > this.player.mass + 2 && this.wanderers[i].eaten == false) {
+                console.log("here");
+                this.wanderers[i].element.style.border = "3px solid rgba(40, 0, 0, 1)";
+                this.wanderers[i].element.style.backgroundColor = "rgba(0, 83, 14, 1);";
+                console.log("but not here");
+            } else if (this.wanderers[i].mass < this.player.mass + 2 && this.wanderers[i].mass > this.player.mass - 2 && this.wanderers[i].eaten == false) {
+                this.wanderers[i].element.style.border = "3px solid rgba(0, 0, 0, 1)";
+                this.wanderers[i].element.style.backgroundColor = "3px solid rgba(0, 83, 14, 1);";  //WHAT IS GOING ON HERE??!??!? Why does the color not change?
+                console.log(this.wanderers[i].element.style.backgroundColor);        //why is the border special?????
+                console.log(this.wanderers[i].element.style.border); //this makes a good 0 sense.
             } else {
-                this.wanderers[i].element.style.border = "3px solid rgb(0, 0, 0)";
+                this.wanderers[i].element.style.border = "rgba(0, 0, 0, 0)";
+                this.wanderers[i].element.style.backgroundColor = "rgba(0, 83, 14, 0.2)";
+                this.wanderers[i].element.style.zIndex = 0;
             }
         }
 
@@ -450,15 +647,34 @@ let Cell_Division = {
             this.chasers[i].element.style.left = this.chasers[i].chaserX + "px";
             this.chasers[i].element.style.height = (this.chasers[i].mass + 25) + "px";
             this.chasers[i].element.style.width = (this.chasers[i].mass + 25) + "px";
-            if (this.chasers[i].mass < this.player.mass - 2 ) {
+            this.chasers[i].element.style.zIndex = this.chasers[i].mass;
+            if (this.chasers[i].mass < this.player.mass - 2 && this.chasers[i].eaten == false) {
                 this.chasers[i].element.style.border = "3px solid rgb(0, 0, 40)";
 
-            } else if (this.chasers[i].mass > this.player.mass + 2 ) {
+            } else if (this.chasers[i].mass > this.player.mass + 2 && this.chasers[i].eaten == false) {
                 this.chasers[i].element.style.border = "3px solid rgb(40, 0, 0)";
-            } else {
+            } else if (this.chasers[i].mass < this.player.mass + 2 && this.chasers[i].mass > this.player.mass - 2 && this.chasers[i].eaten == false) {
                 this.chasers[i].element.style.border = "3px solid rgb(0, 0, 0)";
-            //Shown Score
-            this.pscore = "Score = " + this.scoreBoard;
+            } else {
+                this.chasers[i].element.style.border = "rgba(0, 0, 0, 0)";
+                this.chasers[i].element.style.backgroundColor = "rgba(83, 0, 0, 0.2)";
+                this.chasers[i].element.style.zIndex = 0;
+            }
+        }
+        //power cells
+        for (let i = 0; i < this.powers.length; i++) {
+            this.powers[i].element.style.top = this.powers[i].powerY + "px";
+            this.powers[i].element.style.left = this.powers[i].powerX + "px";
+            this.powers[i].element.style.height = (this.powers[i].mass + 25) + "px";
+            this.powers[i].element.style.width = (this.powers[i].mass + 25) + "px";
+            this.powers[i].element.style.zIndex = (this.powers[i].mass * 1);
+            if (this.powers[i].mass < this.player.mass - 2) {
+                this.powers[i].element.style.border = "3px solid rgb(0, 0, 40)";
+
+            } else if (this.powers[i].mass > this.player.mass + 2) {
+                this.powers[i].element.style.border = "3px solid rgb(40, 0, 0)";
+            } else {
+                this.powers[i].element.style.border = "3px solid rgb(0, 0, 0)";
             }
         }
     },
