@@ -13,6 +13,7 @@ let Cell_Division = {
     skipbutton: document.getElementById("skip_button"),
     container: document.getElementById("playing_screen"),
     tutorialText: document.getElementById("tutorial"),
+    deathscreen: document.getElementById("death_view"),
     usedTime: 0,
     frameTime: 0,
     score: 0,
@@ -22,7 +23,7 @@ let Cell_Division = {
 
 
     init: function () {                                                       //----- Player Key Press Detection -----//  
-
+        this.deathscreen.style.backgroundColor = "rgba(255, 0, 0, 0)";
         this.skipbutton.style.color = "rgba(0, 183, 255, 0)";
         this.skipbutton.style.backgroundColor = "rgba(0, 122, 170, 0)";
         this.skipbutton.style.borderTopColor = "rgba(0, 151, 211, 0)";
@@ -70,6 +71,8 @@ let Cell_Division = {
                 this.frameTime = 3600;
                 this.player.mass = 11.7;
                 this.score = 6;
+                this.deathscreen.style.height = window.height + "px";
+                this.deathscreen.style.width = window.width + "px";
             }
         }.bind(Cell_Division);
 
@@ -117,6 +120,7 @@ let Cell_Division = {
             maxSpeed: 5,
             friction: 7,  //DO NOT TURN THIS TO A NEGATIVE VALUE (Or really any value below 1)
             speed: 0.4,
+            deathTimer: 100,
             mass: 5,
             right: false,
             down: false,
@@ -203,15 +207,19 @@ let Cell_Division = {
         this.chasersMove();
         this.chasersDetect();
         this.addTime();
+        this.playerHealth();
         this.fade();
         this.spawners();
         console.log("Current Mass: " + this.player.mass);
         this.firstPowerMove();
         //this.player.mass = this.player.mass + 0.5;
+        if (this.player.deathTimer < 0) {
+            this.death();
+        }
     },
 
     spawners: function () {
-        if (this.usedTime > 111) {
+        if (this.usedTime > 109) {
             if (this.player.mass < 35) {
                 let random = Math.ceil(Math.random() * 3);
                 if (this.usedTime % 10 == 0 && random <= 2) {
@@ -221,6 +229,10 @@ let Cell_Division = {
                 }
             }
         }
+    },
+
+    death: function () {
+
     },
 
     fade: function () {
@@ -281,6 +293,8 @@ let Cell_Division = {
                 this.skipbutton.style.borderLeftColor = "rgba(0, 95, 136, " + (1 - (this.usedTime - 30) / 3) + ")";
                 this.skipbutton.style.borderRightColor = "rgba(0, 50, 71, " + (1 - (this.usedTime - 30) / 3) + ")";
                 this.skipbutton.style.borderBottomColor = "rgba(0, 50, 71, " + (1 - (this.usedTime - 30) / 3) + ")";
+                this.deathscreen.style.height = window.height + "px";
+                this.deathscreen.style.width = window.width + "px";
             }
         }
         if (this.usedTime == 33) {
@@ -388,7 +402,12 @@ let Cell_Division = {
                     this.score = Math.ceil(this.score + wanderer.mass);
 
                 } else if (this.wanderers[i].mass > this.player.mass + 2) {
-                    this.wanderers[i].element.style.border = "3px solid rgb(255, 0, 0)";  //PLAYER DEATH
+                    wanderer.element.style.border = "3px solid rgb(120, 0, 0)";  //PLAYER DEATH
+                    this.player.inertiaX = this.player.inertiaX/1.2;
+                    this.player.inertiaY = this.player.inertiaY/1.2;
+                    if (this.player.deathTimer > -1) {
+                        this.player.deathTimer = this.player.deathTimer - 0.4;
+                    }
                 }
             }
         }
@@ -409,7 +428,13 @@ let Cell_Division = {
                     this.score = Math.ceil(this.score + chaser.mass + 1);
 
                 } else if (this.chasers[i].mass > this.player.mass + 2) {
-                    this.chasers[i].element.style.border = "3px solid rgb(255, 0, 0)";  //PLAYER DEATH
+                    chaser.element.style.border = "3px solid rgb(120, 0, 0)";
+                    this.player.inertiaX = this.player.inertiaX/1.2;
+                    this.player.inertiaY = this.player.inertiaY/1.2;     //PLAYER DEATH
+                    if (this.player.deathTimer > -1) {
+                        this.player.deathTimer = this.player.deathTimer - 0.2;
+                    }
+
                 }
             }
         }
@@ -423,6 +448,17 @@ let Cell_Division = {
         this.usedTime = this.frameTime / 40;
         console.log("Used Time: " + this.usedTime);
         console.log("Frame Time: " + this.frameTime);
+    },
+
+    playerHealth: function () {
+        console.log("deathTimer: " + this.player.deathTimer);
+        this.deathscreen.style.backgroundColor = "rgba(255, 0, 0, " + (0.5 - (this.player.deathTimer/200)) + ")";
+        if (this.usedTime % 1 == 0 && this.player.deathTimer > 0 && this.player.deathTimer < 100) {
+            this.player.deathTimer = this.player.deathTimer + 1;             //Regeneration of player health
+            }
+            if (this.deathTimer > 100) {
+                this.deathTimer = 100;
+            }
     },
 
     wanderersDetect: function () {
@@ -578,19 +614,19 @@ let Cell_Division = {
                 powerWanderer.powerY = powerWanderer.powerY + powerWanderer.inertiaY;
                 powerWanderer.energy = powerWanderer.energy + 1;
             } else {
-                powerWanderer.maxEnergy = (Math.random() * 500) + 100;
+                powerWanderer.maxEnergy = (Math.random() * 200) + 100;
                 powerWanderer.energy = 0;
                 powerWanderer.inertiaX = Math.random() * 6 - 3;
                 powerWanderer.inertiaY = Math.random() * 6 - 3;
                 if (powerWanderer.inertiaX < 0) {
-                    powerWanderer.inertiaX = powerWanderer.inertiaX - 6;
+                    powerWanderer.inertiaX = powerWanderer.inertiaX - 3;
                 } else {
-                    powerWanderer.inertiaX = powerWanderer.inertiaX + 6;
+                    powerWanderer.inertiaX = powerWanderer.inertiaX + 3;
                 }
                 if (powerWanderer.inertiaY < 0) {
-                    powerWanderer.inertiaY = powerWanderer.inertiaY - 6;
+                    powerWanderer.inertiaY = powerWanderer.inertiaY - 3;
                 } else {
-                    powerWanderer.inertiaY = powerWanderer.inertiaY + 6;
+                    powerWanderer.inertiaY = powerWanderer.inertiaY + 3;
                 }
             }
         } else {

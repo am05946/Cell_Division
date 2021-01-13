@@ -70,7 +70,17 @@ blue {
 
 #tutorial {
     text-align: center;
-    color: rgba(0, 0, 0, 0)
+    color: rgba(0, 0, 0, 0);
+}
+
+#death_view {
+    top: 0px;
+    left: 0px;
+    position: absolute;
+    width: 0px;
+    height: 0px;
+    text-align: center;
+    background: rgba(255, 0, 0, 1);
 }
 
 #start_button {
