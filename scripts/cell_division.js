@@ -10,18 +10,31 @@ let Cell_Division = {
     splitzone: document.getElementById("split_zone"),
     chaserzone: document.getElementById("chaser_zone"),
     startbutton: document.getElementById("start_button"),
+    skipbutton: document.getElementById("skip_button"),
     container: document.getElementById("playing_screen"),
     tutorialText: document.getElementById("tutorial"),
     usedTime: 0,
     frameTime: 0,
+    score: 0,
+    highscore: 0,
     gamestart: false,
+    skip: false,
 
 
-    init: function () {                                                       //----- Player Key Press Detection -----//                      
+    init: function () {                                                       //----- Player Key Press Detection -----//  
+
+        this.skipbutton.style.color = "rgba(0, 183, 255, 0)";
+        this.skipbutton.style.backgroundColor = "rgba(0, 122, 170, 0)";
+        this.skipbutton.style.borderTopColor = "rgba(0, 151, 211, 0)";
+        this.skipbutton.style.borderLeftColor = "rgba(0, 151, 211, 0)";
+        this.skipbutton.style.borderRightColor = "rgba(0, 100, 139, 0)";
+        this.skipbutton.style.borderBottomColor = "rgba(0, 100, 139, 0)";
+
         this.player = this.createPlayer();     //Create player
         for (let i = 0; i < 3; i++) {
             this.powers.push(this.createPower())
         }
+        document.getElementById("score_box").innerHTML = "<h3> Highscore: " + this.highscore + "</h3><h3> Score: " + this.score + "</h3>";
 
 
         window.onkeydown = function (event) {
@@ -50,6 +63,16 @@ let Cell_Division = {
             }
         }.bind(Cell_Division);
 
+        this.skipbutton.onclick = function (event) {
+            if (this.usedTime < 30 && this.skip == false && (this.usedTime > 3.1)) {
+                this.skip = true;
+                this.wanderers.push(this.createWanderer());
+                this.frameTime = 3600;
+                this.player.mass = 11.7;
+                this.score = 6;
+            }
+        }.bind(Cell_Division);
+
         window.onkeyup = function (event) {
             if (event.keyCode == 87) {    //!W  (Stop moving Move up)
                 this.player.up = false;
@@ -74,10 +97,10 @@ let Cell_Division = {
     startGame: function () {
         this.startAnimation();
         console.log("started animation");
-        this.powers[1].powerY = 285;
-        this.powers[2].powerY = 495;
-        this.powers[1].powerX = this.powers[1].powerX - 25;
-        this.powers[2].powerX = this.powers[2].powerX - 50
+        this.powers[1].powerY = 335;
+        this.powers[2].powerY = 575;
+        this.powers[1].powerX = this.powers[1].powerX;
+        this.powers[2].powerX = this.powers[2].powerX;
         this.powers[1].mass = 100;
         this.powers[2].mass = 150;
     },
@@ -109,16 +132,16 @@ let Cell_Division = {
         wanderdiv.className = "wanderer";
         this.container.append(wanderdiv);
         let wanderer = {
-            mass: Math.random() * 35,
+            mass: Math.ceil(Math.random() * 35),
             wandererX: this.powers[0].powerX,
             wandererY: this.powers[0].powerY,
             inertiaX: 0,
             inertiaY: 0,
             friction: 1,
-            maxSpeed: Math.random() * 2 + 1,
+            maxSpeed: Math.random() * 1.5 + 1.5,
             energy: 0,
             eaten: false,
-            maxenergy: Math.random() * 250 + 125,
+            maxEnergy: Math.random() * 250 + 125,
             targetX: Math.random() * 1300,
             targetY: Math.random() * 660,
             element: wanderdiv,
@@ -131,16 +154,16 @@ let Cell_Division = {
         chaserdiv.className = "chaser";
         this.container.append(chaserdiv);
         let chaser = {
-            mass: Math.random() * 85,
+            mass: Math.ceil(Math.random() * 85),
             chaserX: this.powers[1].powerX,
             chaserY: this.powers[1].powerY,
             inertiaX: 0,
             inertiaY: 0,
             friction: 1,
-            maxSpeed: Math.random() * 2.5 + 1,
+            maxSpeed: Math.random() * 1 + 2,
             energy: 0,
             eaten: false,
-            maxenergy: Math.random() * 250 + 25,
+            maxEnergy: Math.random() * 250 + 25,
             targetX: Math.random() * 250 + 125,
             targetY: Math.random() * 500 + 125,
             element: chaserdiv,
@@ -154,8 +177,12 @@ let Cell_Division = {
         this.container.append(powerdiv);
         let power = {
             mass: 50,
-            powerX: 1345,
+            powerX: 1365,
             powerY: 75,
+            inertiaY: 0,
+            inertiaX: 0,
+            energy: 0,
+            maxEnergy: 50,
             element: powerdiv,
         }
         return power;
@@ -168,7 +195,7 @@ let Cell_Division = {
     animateGame: function () {
         this.moveEntities();
         this.renderEntities();
-        this.challengeInertia();
+        //this.challengeInertia();
         this.collision();
         this.playerMovement();
         this.wanderersDetect();
@@ -178,12 +205,14 @@ let Cell_Division = {
         this.addTime();
         this.fade();
         this.spawners();
+        console.log("Current Mass: " + this.player.mass);
+        this.firstPowerMove();
         //this.player.mass = this.player.mass + 0.5;
     },
 
     spawners: function () {
         if (this.usedTime > 111) {
-            if (this.player.mass < 75) {
+            if (this.player.mass < 35) {
                 let random = Math.ceil(Math.random() * 3);
                 if (this.usedTime % 10 == 0 && random <= 2) {
                     this.wanderers.push(this.createWanderer());
@@ -210,6 +239,12 @@ let Cell_Division = {
             this.splitzone.style.border = "3px dashed rgba(255,255,0, " + (this.usedTime / 6) + ")";
             this.chaserzone.style.backgroundColor = "rgba(255,0,0, " + (this.usedTime / 10) + ")";
             this.chaserzone.style.border = "3px dashed rgba(255,0,0, " + (this.usedTime / 6) + ")";
+            this.skipbutton.style.color = "rgba(0, 183, 255, " + (this.usedTime / 3) + ")";
+            this.skipbutton.style.backgroundColor = "rgba(0, 122, 170, " + (this.usedTime / 3) + ")";
+            this.skipbutton.style.borderTopColor = "rgba(0, 151, 211, " + (this.usedTime / 3) + ")";
+            this.skipbutton.style.borderLeftColor = "rgba(0, 151, 211, " + (this.usedTime / 3) + ")";
+            this.skipbutton.style.borderRightColor = "rgba(0, 100, 139, " + (this.usedTime / 3) + ")";
+            this.skipbutton.style.borderBottomColor = "rgba(0, 100, 139, " + (this.usedTime / 3) + ")";
             for (i = 0; i < this.powers.length; i++) {
                 this.powers[i].element.style.backgroundColor = "rgba(6, 15, 20, " + (this.usedTime / 3) + ")";
                 this.powers[i].element.style.border = "3px solid rgba(40, 0, 0, " + (this.usedTime / 3) + ")";
@@ -239,6 +274,14 @@ let Cell_Division = {
         if (this.usedTime > 30 && this.usedTime < 33.1) {
             document.getElementById("tutorial").innerHTML = "<h2>Here comes one now.</h2>";
             this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 30) / 3) + ")";
+            if (this.skip == false) {
+                this.skipbutton.style.color = "rgba(0, 122, 170, " + (1 - (this.usedTime - 30) / 3) + ")";
+                this.skipbutton.style.backgroundColor = "rgba(0, 70, 100, " + (1 - (this.usedTime - 30) / 3) + ")";
+                this.skipbutton.style.borderTopColor = "rgba(0, 95, 136, " + (1 - (this.usedTime - 30) / 3) + ")";
+                this.skipbutton.style.borderLeftColor = "rgba(0, 95, 136, " + (1 - (this.usedTime - 30) / 3) + ")";
+                this.skipbutton.style.borderRightColor = "rgba(0, 50, 71, " + (1 - (this.usedTime - 30) / 3) + ")";
+                this.skipbutton.style.borderBottomColor = "rgba(0, 50, 71, " + (1 - (this.usedTime - 30) / 3) + ")";
+            }
         }
         if (this.usedTime == 33) {
             this.wanderers.push(this.createWanderer());
@@ -300,6 +343,15 @@ let Cell_Division = {
         if (this.usedTime > 90 && this.usedTime < 93.1) {
             document.getElementById("tutorial").innerHTML = "<h2>Good Luck</h2>";
             this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - 90) / 3) + ")";
+            if (this.skip == true) {
+                this.skipbutton.style.color = "rgba(0, 122, 170, " + (1 - (this.usedTime - 90) / 3) + ")";
+                this.skipbutton.style.backgroundColor = "rgba(0, 70, 100, " + (1 - (this.usedTime - 90) / 3) + ")";
+                this.skipbutton.style.borderTopColor = "rgba(0, 95, 136, " + (1 - (this.usedTime - 90) / 3) + ")";
+                this.skipbutton.style.borderLeftColor = "rgba(0, 95, 136, " + (1 - (this.usedTime - 90) / 3) + ")";
+                this.skipbutton.style.borderRightColor = "rgba(0, 50, 71, " + (1 - (this.usedTime - 90) / 3) + ")";
+                this.skipbutton.style.borderBottomColor = "rgba(0, 50, 71, " + (1 - (this.usedTime - 90) / 3) + ")";
+                this.wanderers[0].mass = 10;
+            }
         }
         if (this.usedTime > 96 && this.usedTime < 99.1) {
             this.tutorialText.style.color = "rgba(0, 0, 0, " + (1 - (this.usedTime - 87) / 3) + ")";
@@ -322,7 +374,7 @@ let Cell_Division = {
             let dy = wanderer.wandererY - this.player.playerY;
             let distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < wanderer.mass + this.player.mass + 25) {
+            if (distance < wanderer.mass / 2 + this.player.mass / 2 + 25) {
                 console.log("entity collided with");
                 if (wanderer.mass < this.player.mass - 2 && wanderer.eaten == false) {
                     if (this.player.mass <= 8) {
@@ -333,6 +385,7 @@ let Cell_Division = {
                     }
                     //this.container.children[i].remove();
                     wanderer.eaten = true;
+                    this.score = Math.ceil(this.score + wanderer.mass);
 
                 } else if (this.wanderers[i].mass > this.player.mass + 2) {
                     this.wanderers[i].element.style.border = "3px solid rgb(255, 0, 0)";  //PLAYER DEATH
@@ -347,34 +400,22 @@ let Cell_Division = {
             let dy = chaser.chaserY - this.player.playerY;
             let distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < chaser.mass + this.player.mass + 25) {
+            if (distance < chaser.mass / 2 + this.player.mass / 2 + 25) {
                 console.log("entity collided with");
                 if (chaser.mass < this.player.mass - 2 && chaser.eaten == false) {
                     this.player.mass = this.player.mass + (chaser.mass * 2) / this.player.mass
                     //this.container.children[i].remove();
                     chaser.eaten = true;
+                    this.score = Math.ceil(this.score + chaser.mass + 1);
 
                 } else if (this.chasers[i].mass > this.player.mass + 2) {
                     this.chasers[i].element.style.border = "3px solid rgb(255, 0, 0)";  //PLAYER DEATH
                 }
             }
         }
-    },
-
-    challengeInertia: function () {
-        if (this.player.inertiaY > 0) {
-            this.player.inertiaY -= 0.05;
-        }
-        if (this.player.inertiaX > 0) {
-            this.player.inertiaX -= 0.05;
-        }
-        if (this.player.inertiaY < 0) {
-            this.player.inertiaY += 0.05;
-        }
-        if (this.player.inertiaX < 0) {
-            this.player.inertiaX += 0.05;
-
-        }
+        //I (Zander) would've put the code that made the cells bounce on the walls here, but for some reason they didn't
+        //work unless they were inside their movement code. My guess is that it has to with the amount of calculations at
+        //the same time that went on inside the collision function at the time offset it for some reason.
     },
 
     addTime: function () {
@@ -456,15 +497,25 @@ let Cell_Division = {
             }
             console.log("energy: " + wanderer.energy);
 
-            if (wanderer.energy >= wanderer.maxenergy) {
+            if (wanderer.energy >= wanderer.maxEnergy) {
                 wanderer.targetX = Math.random() * (1450 - (wanderer.mass * 2)) + wanderer.mass;                 //HERE Math.random() *
                 wanderer.targetY = Math.random() * (660 - (wanderer.mass * 2)) + wanderer.mass;                  //HERE Math.random() * 
                 wanderer.energy = 0;
             }
-            //console.log(this.wanderer.inertiaY);
-            //console.log(this.wanderer.inertiaX);
-            //console.log(this.wanderer.targetX)
-            //console.log(this.wanderer.wanderX - wanderer.targetX);
+
+            //Wanderers bouncing on the walls
+            if (wanderer.wandererY >= 670 - wanderer.mass / 2 && wanderer.inertiaY > 0) {     //Bounce on ceiling and floor
+                wanderer.inertiaY = wanderer.inertiaY * -1;
+            }
+            if (wanderer.wandererX >= 1470 - wanderer.mass / 2 && wanderer.inertiaX > 0) {     //Bounce on both walls
+                wanderer.inertiaX = wanderer.inertiaX * -1;
+            }
+            if (wanderer.wandererY <= 0 + wanderer.mass / 2 && wanderer.inertiaY < 0) {     //Bounce on ceiling and floor
+                wanderer.inertiaY = wanderer.inertiaY * -1;
+            }
+            if (wanderer.wandererX <= 0 + wanderer.mass / 2 && wanderer.inertiaX < 0) {     //Bounce on both walls
+                wanderer.inertiaX = wanderer.inertiaX * -1;
+            }
         }
 
     },
@@ -497,17 +548,95 @@ let Cell_Division = {
             }
             console.log("chaser energy: " + chaser.energy);
 
-            if (chaser.energy >= chaser.maxenergy) {
+            if (chaser.energy >= chaser.maxEnergy) {
                 chaser.targetX = Math.random() * (1450 - (chaser.mass * 2)) + chaser.mass;                 //HERE Math.random() *
                 chaser.targetY = Math.random() * (660 - (chaser.mass * 2)) + chaser.mass;                  //HERE Math.random() * 
                 chaser.energy = 0;
             }
-            console.log(chaser.inertiaY);
-            console.log(chaser.inertiaX);
-            console.log(chaser.targetX)
-            console.log(chaser.wanderX - chaser.targetX);
+            //Chasers bouncing on the walls
+            if (chaser.chaserY >= 670 - chaser.mass / 2 && chaser.inertiaY > 0) {     //Bounce on ceiling and floor
+                chaser.inertiaY = chaser.inertiaY * -1;
+            }
+            if (chaser.chaserX >= 1470 - chaser.mass / 2 && chaser.inertiaX > 0) {     //Bounce on both walls
+                chaser.inertiaX = chaser.inertiaX * -1;
+            }
+            if (chaser.chaserY <= 0 + chaser.mass / 2 && chaser.inertiaY < 0) {     //Bounce on ceiling and floor
+                chaser.inertiaY = chaser.inertiaY * -1;
+            }
+            if (chaser.chaserX <= 0 + chaser.mass / 2 && chaser.inertiaX < 0) {     //Bounce on both walls
+                chaser.inertiaX = chaser.inertiaX * -1;
+            }
         }
 
+    },
+
+    firstPowerMove: function () {
+        let powerWanderer = this.powers[0];
+        if (this.player.mass >= 35) {
+            if (powerWanderer.energy < powerWanderer.maxEnergy) {
+                powerWanderer.powerX = powerWanderer.powerX + powerWanderer.inertiaX;
+                powerWanderer.powerY = powerWanderer.powerY + powerWanderer.inertiaY;
+                powerWanderer.energy = powerWanderer.energy + 1;
+            } else {
+                powerWanderer.maxEnergy = (Math.random() * 500) + 100;
+                powerWanderer.energy = 0;
+                powerWanderer.inertiaX = Math.random() * 6 - 3;
+                powerWanderer.inertiaY = Math.random() * 6 - 3;
+                if (powerWanderer.inertiaX < 0) {
+                    powerWanderer.inertiaX = powerWanderer.inertiaX - 6;
+                } else {
+                    powerWanderer.inertiaX = powerWanderer.inertiaX + 6;
+                }
+                if (powerWanderer.inertiaY < 0) {
+                    powerWanderer.inertiaY = powerWanderer.inertiaY - 6;
+                } else {
+                    powerWanderer.inertiaY = powerWanderer.inertiaY + 6;
+                }
+            }
+        } else {
+            if (powerWanderer.powerX > 1268 + powerWanderer.mass) {
+                powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
+                powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
+            } else {
+                powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2;
+                powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
+            }
+            if (powerWanderer.powerY < 255 - powerWanderer.mass) {
+                powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
+                powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
+            } else {
+                powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
+                powerWanderer.powerY = powerWanderer.powerY + Math.random() * -2;
+            }
+            if (powerWanderer.powerX < 1500 - powerWanderer.mass) {
+                powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
+                powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
+            } else {
+                powerWanderer.powerX = powerWanderer.powerX + Math.random() * -2;
+                powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
+            }
+            if (powerWanderer.powerY > 0 + powerWanderer.mass) {
+                powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
+                powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
+            } else {
+                powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
+                powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2;
+            }
+        }
+
+        //bouncing on walls
+        if (powerWanderer.powerY >= 670 - powerWanderer.mass / 2 && powerWanderer.inertiaY > 0) {     //Bounce on ceiling and floor
+            powerWanderer.inertiaY = powerWanderer.inertiaY * -1;
+        }
+        if (powerWanderer.powerX >= 1470 - powerWanderer.mass / 2 && powerWanderer.inertiaX > 0) {     //Bounce on both walls
+            powerWanderer.inertiaX = powerWanderer.inertiaX * -1;
+        }
+        if (powerWanderer.powerY <= 0 + powerWanderer.mass / 2 && powerWanderer.inertiaY < 0) {     //Bounce on ceiling and floor
+            powerWanderer.inertiaY = powerWanderer.inertiaY * -1;
+        }
+        if (powerWanderer.powerX <= 0 + powerWanderer.mass / 2 && powerWanderer.inertiaX < 0) {     //Bounce on both walls
+            powerWanderer.inertiaX = powerWanderer.inertiaX * -1;
+        }
     },
 
     playerMovement: function () {                                     //----- Player Movement -----//
@@ -570,16 +699,17 @@ let Cell_Division = {
             }
         }
 
-        if (this.player.playerY >= 670 - this.player.mass && this.player.inertiaY > 0) {     //Bounce on ceiling and floor
+        //Bouncing on walls
+        if (this.player.playerY >= 670 - this.player.mass / 2 && this.player.inertiaY > 0) {     //Bounce on ceiling and floor
             this.player.inertiaY = this.player.inertiaY * -1;
         }
-        if (this.player.playerX >= 1470 - this.player.mass && this.player.inertiaX > 0) {     //Bounce on both walls
+        if (this.player.playerX >= 1470 - this.player.mass / 2 && this.player.inertiaX > 0) {     //Bounce on both walls
             this.player.inertiaX = this.player.inertiaX * -1;
         }
-        if (this.player.playerY <= 0 && this.player.inertiaY < 0) {     //Bounce on ceiling and floor
+        if (this.player.playerY <= 0 + this.player.mass / 2 && this.player.inertiaY < 0) {     //Bounce on ceiling and floor
             this.player.inertiaY = this.player.inertiaY * -1;
         }
-        if (this.player.playerX <= 0 && this.player.inertiaX < 0) {     //Bounce on both walls
+        if (this.player.playerX <= 0 + this.player.mass / 2 && this.player.inertiaX < 0) {     //Bounce on both walls
             this.player.inertiaX = this.player.inertiaX * -1;
         }
 
@@ -608,16 +738,16 @@ let Cell_Division = {
     renderEntities: function () {
 
         //player
-        this.player.element.style.top = this.player.playerY - (this.player.mass/2) + "px";
-        this.player.element.style.left = this.player.playerX - (this.player.mass/2) + "px";
+        this.player.element.style.top = this.player.playerY - (this.player.mass / 2) + "px";
+        this.player.element.style.left = this.player.playerX - (this.player.mass / 2) + "px";
         this.player.element.style.height = (this.player.mass + 25) + "px";
         this.player.element.style.width = (this.player.mass + 25) + "px";
         this.player.element.style.zIndex = this.player.mass;
 
         //wanderers
         for (let i = 0; i < this.wanderers.length; i++) {
-            this.wanderers[i].element.style.top = this.wanderers[i].wandererY - (this.wanderers[i].mass/2) + "px";
-            this.wanderers[i].element.style.left = this.wanderers[i].wandererX - (this.wanderers[i].mass/2) + "px";
+            this.wanderers[i].element.style.top = this.wanderers[i].wandererY - (this.wanderers[i].mass / 2) + "px";
+            this.wanderers[i].element.style.left = this.wanderers[i].wandererX - (this.wanderers[i].mass / 2) + "px";
             this.wanderers[i].element.style.height = (this.wanderers[i].mass + 25) + "px";
             this.wanderers[i].element.style.width = (this.wanderers[i].mass + 25) + "px";
             this.wanderers[i].element.style.zIndex = this.wanderers[i].mass;
@@ -643,8 +773,8 @@ let Cell_Division = {
 
         //chasers
         for (let i = 0; i < this.chasers.length; i++) {
-            this.chasers[i].element.style.top = this.chasers[i].chaserY - (this.chasers[i].mass/2) + "px";
-            this.chasers[i].element.style.left = this.chasers[i].chaserX - (this.chasers[i].mass/2) + "px";
+            this.chasers[i].element.style.top = this.chasers[i].chaserY - (this.chasers[i].mass / 2) + "px";
+            this.chasers[i].element.style.left = this.chasers[i].chaserX - (this.chasers[i].mass / 2) + "px";
             this.chasers[i].element.style.height = (this.chasers[i].mass + 25) + "px";
             this.chasers[i].element.style.width = (this.chasers[i].mass + 25) + "px";
             this.chasers[i].element.style.zIndex = this.chasers[i].mass;
@@ -663,8 +793,8 @@ let Cell_Division = {
         }
         //power cells
         for (let i = 0; i < this.powers.length; i++) {
-            this.powers[i].element.style.top = this.powers[i].powerY - (this.powers[i].mass/2) + "px";
-            this.powers[i].element.style.left = this.powers[i].powerX - (this.powers[i].mass/2) + "px";
+            this.powers[i].element.style.top = this.powers[i].powerY - (this.powers[i].mass / 2) + "px";
+            this.powers[i].element.style.left = this.powers[i].powerX - (this.powers[i].mass / 2) + "px";
             this.powers[i].element.style.height = (this.powers[i].mass + 25) + "px";
             this.powers[i].element.style.width = (this.powers[i].mass + 25) + "px";
             this.powers[i].element.style.zIndex = this.powers[i].mass;
@@ -676,6 +806,13 @@ let Cell_Division = {
             } else {
                 this.powers[i].element.style.border = "3px solid rgb(0, 0, 0)";
             }
+        }
+
+        //Score and HighScore
+        console.log("Score = " + this.score);
+        document.getElementById("score_box").innerHTML = "<h3> Highscore: " + this.highscore + "</h3><h3> Score: " + this.score + "</h3>";
+        if (this.score > this.highscore) {
+            this.highscore = this.score;
         }
     },
 

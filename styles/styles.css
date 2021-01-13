@@ -21,6 +21,13 @@ h2 {
     user-select: none;
 }
 
+h3 {
+    text-align: left;
+    user-select: none;
+    margin: 0% 10% 0% 0%;
+    color: black;
+}
+
 red {
     color: rgb(50, 0, 0);
 }
@@ -37,6 +44,18 @@ blue {
     border-bottom-color:rgb(0, 50, 71);
     border-right-color:rgb(0, 50, 71);
 }
+
+/*
+#skip_button:hover {
+    background-color:rgb(0, 70, 100);
+    color:rgb(0, 122, 170);
+       border-top-color:rgb(0, 95, 136);
+       border-left-color:rgb(0, 95, 136);
+       border-bottom-color:rgb(0, 50, 71);
+       border-right-color:rgb(0, 50, 71);
+   }
+*/
+
 
 #playing_screen {
     width: 1500px;
@@ -64,6 +83,23 @@ blue {
     color:rgba(0, 183, 255, 1);
     top: 300px;
     left: 634px;
+    border-radius: 10px;
+    border-bottom-color:rgb(0, 100, 139);
+    border-right-color:rgb(0, 100, 139);
+    border-left-color:rgb(0, 151, 211);
+    border-top-color:rgb(0, 151, 211);
+}
+
+#skip_button {
+    font-size: 6;
+    width: 45px;
+    height: 22px;
+    border: 5px solid;
+    position: absolute;
+    background-color:rgb(0, 122, 170);
+    color:rgba(0, 183, 255, 1);
+    top: 668px;
+    left: 0px;
     border-radius: 10px;
     border-bottom-color:rgb(0, 100, 139);
     border-right-color:rgb(0, 100, 139);
