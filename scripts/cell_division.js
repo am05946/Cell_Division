@@ -4,7 +4,7 @@ let Cell_Division = {
     player: undefined,
     wanderers: [],
     chasers: [],
-    spitters: [],
+    bouncers: [],
     powers: [],
     wanderzone: document.getElementById("wander_zone"),
     bouncerzone: document.getElementById("bouncer_zone"),
@@ -162,8 +162,8 @@ let Cell_Division = {
         this.container.append(bouncerdiv);
         let bouncerer = {
             mass: Math.ceil(Math.random() * 35),
-            bouncererX: this.powers[0].powerX,
-            bouncererY: this.powers[0].powerY,
+            bouncererX: this.powers[2].powerX,
+            bouncererY: this.powers[2].powerY,
             inertiaX: 0,
             inertiaY: 0,
             friction: 1,
@@ -255,6 +255,14 @@ let Cell_Division = {
                     this.wanderers.push(this.createWanderer());
                 } else if (this.usedTime % 10 == 0 && random == 3) {
                     this.chasers.push(this.createChaser());
+                }
+            }
+            if (this.player.mass > 35) {
+                let random = Math.ceil(Math.random() * 3);
+                if (this.usedTime % 10 == 0 && random <= 2) {
+                    this.chasers.push(this.createChaser());
+                } else if (this.usedTime % 10 == 0 && random == 3) {
+                    this.chasers.push(this.createBouncer());
                 }
             }
         }
@@ -963,23 +971,23 @@ let Cell_Division = {
         }
 
         //bouncers
-        for (let i = 0; i < this.chasers.length; i++) {
-            this.chasers[i].element.style.top = this.chasers[i].chaserY - (this.chasers[i].mass / 2) + "px";
-            this.chasers[i].element.style.left = this.chasers[i].chaserX - (this.chasers[i].mass / 2) + "px";
-            this.chasers[i].element.style.height = (this.chasers[i].mass + 25) + "px";
-            this.chasers[i].element.style.width = (this.chasers[i].mass + 25) + "px";
-            this.chasers[i].element.style.zIndex = this.chasers[i].mass;
-            if (this.chasers[i].mass < this.player.mass - 2 && this.chasers[i].eaten == false) {
-                this.chasers[i].element.style.border = "3px solid rgb(0, 0, 40)";
+        for (let i = 0; i < this.bouncers.length; i++) {
+            this.bouncers[i].element.style.top = this.bouncers[i].chaserY - (this.bouncers[i].mass / 2) + "px";
+            this.bouncers[i].element.style.left = this.bouncers[i].chaserX - (this.bouncers[i].mass / 2) + "px";
+            this.bouncers[i].element.style.height = (this.bouncers[i].mass + 25) + "px";
+            this.bouncers[i].element.style.width = (this.bouncers[i].mass + 25) + "px";
+            this.bouncers[i].element.style.zIndex = this.bouncers[i].mass;
+            if (this.bouncers[i].mass < this.player.mass - 2 && this.bouncers[i].eaten == false) {
+                this.bouncers[i].element.style.border = "3px solid rgb(0, 0, 40)";
 
-            } else if (this.chasers[i].mass > this.player.mass + 2 && this.chasers[i].eaten == false) {
-                this.chasers[i].element.style.border = "3px solid rgb(40, 0, 0)";
-            } else if (this.chasers[i].mass < this.player.mass + 2 && this.chasers[i].mass > this.player.mass - 2 && this.chasers[i].eaten == false) {
-                this.chasers[i].element.style.border = "3px solid rgb(0, 0, 0)";
+            } else if (this.bouncers[i].mass > this.player.mass + 2 && this.bouncers[i].eaten == false) {
+                this.bouncers[i].element.style.border = "3px solid rgb(40, 0, 0)";
+            } else if (this.bouncers[i].mass < this.player.mass + 2 && this.bouncers[i].mass > this.player.mass - 2 && this.bouncers[i].eaten == false) {
+                this.bouncers[i].element.style.border = "3px solid rgb(0, 0, 0)";
             } else {
-                this.chasers[i].element.style.border = "rgba(0, 0, 0, 0)";
-                this.chasers[i].element.style.backgroundColor = "rgba(83, 0, 0, 0.2)";
-                this.chasers[i].element.style.zIndex = 0;
+                this.bouncers[i].element.style.border = "rgba(0, 0, 0, 0)";
+                this.bouncers[i].element.style.backgroundColor = "rgba(83, 0, 0, 0.2)";
+                this.bouncers[i].element.style.zIndex = 0;
             }
         }
 
