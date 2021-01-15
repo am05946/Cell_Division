@@ -18,9 +18,11 @@ let Cell_Division = {
     frameTime: 0,
     score: 0,
     highscore: 0,
+    maxChaserSize: 60,
+    maxBouncerSize: 110,
     gamestart: false,
     skip: false,
-
+    smallerVirus: false,
 
     init: function () {                                                       //----- Player Key Press Detection -----//  
         this.deathscreen.style.backgroundColor = "rgba(155, 0, 0, 0)";
@@ -37,9 +39,8 @@ let Cell_Division = {
         }
         document.getElementById("score_box").innerHTML = "<h3> Highscore: " + this.highscore + "</h3><h3> Score: " + this.score + "</h3>";
 
-
         window.onkeydown = function (event) {
-            if (this.player.dead == false) {
+            //if (this.player.dead == false) {
             if (event.keyCode == 87) {     //W  (Move up)
                 this.player.up = true;
                 //console.log("W was pressed");
@@ -53,7 +54,7 @@ let Cell_Division = {
             if (event.keyCode == 68) {    //D  (Move right)
                 this.player.right = true;
             }
-        }
+            //}
             //console.log(this.inertiaX);
             //console.log(this.inertiaY);
             //console.log("Test");
@@ -131,6 +132,7 @@ let Cell_Division = {
             up: false,
             element: playerdiv,
         }
+        console.log("Player Cell spawned");
         return player;
     },
 
@@ -139,11 +141,11 @@ let Cell_Division = {
         wanderdiv.className = "wanderer";
         this.container.append(wanderdiv);
         let wanderer = {
-            mass: Math.ceil(Math.random() * 35),
+            mass: Math.ceil(Math.random() * 45),
             wandererX: this.powers[0].powerX,
             wandererY: this.powers[0].powerY,
-            inertiaX: 0,
-            inertiaY: 0,
+            inertiaX: -1,
+            inertiaY: -1,
             friction: 1,
             maxSpeed: Math.random() * 1.5 + 1.5,
             energy: 0,
@@ -153,29 +155,26 @@ let Cell_Division = {
             targetY: Math.random() * 660,
             element: wanderdiv,
         }
+        console.log("Wanderer Cell spawned----------------------------------");
         return wanderer;
     },
 
     createBouncer: function () {
         let bouncerdiv = document.createElement("div");
-        bouncerdiv.className = "bouncerer";
+        bouncerdiv.className = "bouncer";
         this.container.append(bouncerdiv);
-        let bouncerer = {
-            mass: Math.ceil(Math.random() * 35),
-            bouncererX: this.powers[2].powerX,
-            bouncererY: this.powers[2].powerY,
-            inertiaX: 0,
-            inertiaY: 0,
+        let bouncer = {
+            mass: Math.ceil(Math.random() * (this.maxBouncerSize - 35) + 35),
+            bouncerX: this.powers[2].powerX,
+            bouncerY: this.powers[2].powerY,
+            inertiaX: Math.random() * 2 + 2,
+            inertiaY: Math.random() * 2 + 2,
             friction: 1,
-            maxSpeed: Math.random() * 1.5 + 1.5,
-            energy: 0,
             eaten: false,
-            maxEnergy: Math.random() * 250 + 125,
-            targetX: Math.random() * 1300,
-            targetY: Math.random() * 660,
             element: bouncerdiv,
         }
-        return bouncerer;
+        console.log("Bouncer Cell spawned----------------------------------");
+        return bouncer;
     },
 
     createChaser: function () {
@@ -183,7 +182,7 @@ let Cell_Division = {
         chaserdiv.className = "chaser";
         this.container.append(chaserdiv);
         let chaser = {
-            mass: Math.ceil(Math.random() * 85),
+            mass: Math.ceil(Math.random() * this.maxChaserSize),
             chaserX: this.powers[1].powerX,
             chaserY: this.powers[1].powerY,
             inertiaX: 0,
@@ -197,6 +196,7 @@ let Cell_Division = {
             targetY: Math.random() * 500 + 125,
             element: chaserdiv,
         }
+        console.log("Chaser Cell spawned----------------------------------");
         return chaser;
     },
 
@@ -208,12 +208,15 @@ let Cell_Division = {
             mass: 50,
             powerX: 1365,
             powerY: 75,
-            inertiaY: 0,
-            inertiaX: 0,
+            inertiaY: -6,
+            inertiaX: -1,
             energy: 0,
+            eaten: false,
+            speed: 6,
             maxEnergy: 50,
             element: powerdiv,
         }
+        console.log("Power Cell spawned----------------------------------");
         return power;
     },
 
@@ -222,6 +225,7 @@ let Cell_Division = {
     },
 
     animateGame: function () {
+        console.log(this.smallerVirus)
         this.moveEntities();
         this.renderEntities();
         //this.challengeInertia();
@@ -231,38 +235,53 @@ let Cell_Division = {
         this.wanderersMove();
         this.chasersMove();
         this.chasersDetect();
-        this.bouncersDetect();
         this.bouncersMove();
         this.addTime();
         this.playerHealth();
         this.fade();
         this.spawners();
         this.death();
-        console.log("Current Mass: " + this.player.mass);
-        console.log("Dead?: " + this.player.dead);
+        //console.log("Current Mass: " + this.player.mass);
+        //console.log("Dead?: " + this.player.dead);
         this.firstPowerMove();
-        //this.player.mass = this.player.mass + 0.5;
+        this.secondPowerMove();
+        this.thirdPowerMove();
+        this.player.mass = this.player.mass + 0.1;                           //<---------- USE WHEN TESTING 
         if (this.player.deathTimer < 0) {
             this.death();
         }
     },
 
     spawners: function () {
-        if (this.usedTime > 109) {
-            if (this.player.mass < 35) {
+
+        if (this.usedTime > 109 && this.usedTime % 10 == 0 && this.smallerVirus == false) {
+            if (this.player.mass < 50) {
                 let random = Math.ceil(Math.random() * 3);
-                if (this.usedTime % 10 == 0 && random <= 2) {
+                if (random <= 2) {
                     this.wanderers.push(this.createWanderer());
-                } else if (this.usedTime % 10 == 0 && random == 3) {
+                } else if (random == 3) {
                     this.chasers.push(this.createChaser());
                 }
+
             }
-            if (this.player.mass > 35) {
+            if (this.player.mass >= 50 && this.player.mass < 100) {
+                this.maxChaserSize = 95;
                 let random = Math.ceil(Math.random() * 3);
-                if (this.usedTime % 10 == 0 && random <= 2) {
+                if (random <= 2) {
                     this.chasers.push(this.createChaser());
-                } else if (this.usedTime % 10 == 0 && random == 3) {
-                    this.chasers.push(this.createBouncer());
+                } else if (random == 3) {
+                    this.bouncers.push(this.createBouncer());
+                }
+            }
+            if (this.player.mass >= 100 && this.player.mass >= 150) {
+                this.maxBouncerSize = 145;
+                let random = Math.ceil(Math.random() * 3);
+                if (random == 1) {
+                    this.wanderers.push(this.createWanderer());
+                } else if (random == 2) {
+                    this.chasers.push(this.createChaser());
+                } else if (random == 3) {
+                    this.bouncers.push(this.createBouncer());
                 }
             }
         }
@@ -270,24 +289,26 @@ let Cell_Division = {
 
     death: function () {
         if (this.player.dead == true) {
-        let currentTime = this.player.deathTimer;
-        document.getElementById("tutorial").innerHTML = "<h2>You have died.</h2>"
-        this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - this.player.deathTimer) / 3) + ")";
-        if (this.usedTime > currentTime + 5) {
-            this.deathscreen.style.top = 0 + "px";
-            this.deathscreen.style.left = 0 + "px";
-            this.deathscreen.style.height = window.innerHeight + "px";
-            this.deathscreen.style.width = window.innerWidth + "px";
-            this.deathscreen.style.backgroundColor = "rgba(155, 0, 0, 0.5)";
-            let playerObj = document.getElementById("player");
-            playerObj.remove;    //I (Zander) have tried to get this to work for several hours for the past few days, and yet, I cannot figure out how to
-            //delete a div. Unfortunately because of this, I will not be able to make a restart button, and those little viruses in the back will have
-            //to remain. Thankfully, there is that old motto, and those un-removable viruses in the back have just become a feature.
-            //Oh yea, and the only reason I'm using this still is cause it doesn't give me an error message, though I do think I got pretty close with:
-            //let playerdivVar = document.getElementById("tutorial");
-            //playerdivVar.removeChild("player");
+            let currentTime = this.player.deathTimer;
+            document.getElementById("tutorial").innerHTML = "<h2>You have died.</h2>"
+            this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - this.player.deathTimer) / 3) + ")";
+            if (this.usedTime > currentTime + 5) {
+                this.deathscreen.style.top = 0 + "px";
+                this.deathscreen.style.left = 0 + "px";
+                this.deathscreen.style.height = window.innerHeight + "px";
+                this.deathscreen.style.width = window.innerWidth + "px";
+                this.player.element.style.backgroundColor = "rgba(255, 255, 255, 0.2)";
+                this.player.element.style.border = "rgba(0, 0, 0, 0)";
+                this.deathscreen.style.backgroundColor = "rgba(155, 0, 0, 0.5)";
+                let playerObj = document.getElementById("player");
+                playerObj.remove;    //I (Zander) have tried to get this to work for several hours for the past few days, and yet, I cannot figure out how to
+                //delete a div. Unfortunately because of this, I will not be able to make a restart button, and those little viruses in the back will have
+                //to remain. Thankfully, there is that old motto, and those un-removable viruses in the back have just become a feature.
+                //Oh yea, and the only reason I'm using this still is cause it doesn't give me an error message, though I do think I got pretty close with:
+                //let playerdivVar = document.getElementById("tutorial");
+                //playerdivVar.removeChild("player");
+            }
         }
-    }
 
     },
 
@@ -314,7 +335,9 @@ let Cell_Division = {
             this.skipbutton.style.borderRightColor = "rgba(0, 100, 139, " + (this.usedTime / 3) + ")";
             this.skipbutton.style.borderBottomColor = "rgba(0, 100, 139, " + (this.usedTime / 3) + ")";
             for (i = 0; i < this.powers.length; i++) {
-                this.powers[i].element.style.backgroundColor = "rgba(6, 15, 20, " + (this.usedTime / 3) + ")";
+                this.powers[0].element.style.backgroundColor = "rgba(6, 25, 20, " + (this.usedTime / 3) + ")";
+                this.powers[1].element.style.backgroundColor = "rgba(26, 15, 20, " + (this.usedTime / 3) + ")";
+                this.powers[2].element.style.backgroundColor = "rgba(26, 25, 20, " + (this.usedTime / 3) + ")";
                 this.powers[i].element.style.border = "3px solid rgba(40, 0, 0, " + (this.usedTime / 3) + ")";
             }
 
@@ -445,8 +468,8 @@ let Cell_Division = {
             let distance = Math.sqrt(dx * dx + dy * dy);
 
             if (distance < wanderer.mass / 2 + this.player.mass / 2 + 25) {
-                console.log("entity collided with");
-                if (wanderer.mass < this.player.mass - 2 && wanderer.eaten == false) {
+                //console.log("entity collided with");
+                if (wanderer.mass < this.player.mass - 2 && wanderer.eaten == false && this.player.dead == false) {
                     if (this.player.mass <= 8) {
                         this.player.mass = this.player.mass + wanderer.mass
                     }
@@ -455,13 +478,13 @@ let Cell_Division = {
                     }
                     //this.container.children[i].remove();
                     wanderer.eaten = true;
+                    this.smallerVirus = false;
                     this.score = Math.ceil(this.score + wanderer.mass);
-                    this.player.deathTimer = this.player.deathTimer + (chaser.mass/2);
-
-                } else if (this.wanderers[i].mass > this.player.mass + 2) {
+                    this.player.deathTimer = this.player.deathTimer + 5
+                } else if (this.wanderers[i].mass > this.player.mass + 2 && this.player.dead == false) {
                     wanderer.element.style.border = "3px solid rgb(120, 0, 0)";  //PLAYER DEATH
-                    this.player.inertiaX = this.player.inertiaX/1.15;
-                    this.player.inertiaY = this.player.inertiaY/1.15;
+                    this.player.inertiaX = this.player.inertiaX / 1.13;
+                    this.player.inertiaY = this.player.inertiaY / 1.13;
                     if (this.player.deathTimer > -1) {
                         this.player.deathTimer = this.player.deathTimer - 0.4;
                     }
@@ -477,8 +500,8 @@ let Cell_Division = {
             let distance = Math.sqrt(dx * dx + dy * dy);
 
             if (distance < bouncer.mass / 2 + this.player.mass / 2 + 25) {
-                console.log("entity collided with");
-                if (bouncer.mass < this.player.mass - 2 && bouncer.eaten == false) {
+                //console.log("entity collided with");
+                if (bouncer.mass < this.player.mass - 2 && bouncer.eaten == false && this.player.dead == false) {
                     if (this.player.mass <= 8) {
                         this.player.mass = this.player.mass + bouncer.mass
                     }
@@ -488,18 +511,45 @@ let Cell_Division = {
                     //this.container.children[i].remove();
                     bouncer.eaten = true;
                     this.score = Math.ceil(this.score + bouncer.mass);
-                    this.player.deathTimer = this.player.deathTimer + (chaser.mass/2);
+                    this.player.deathTimer = this.player.deathTimer + 15
 
-                } else if (this.bouncers[i].mass > this.player.mass + 2) {
+                } else if (this.bouncers[i].mass > this.player.mass + 2 && this.player.dead == false) {
                     bouncer.element.style.border = "3px solid rgb(120, 0, 0)";  //PLAYER DEATH
-                    this.player.inertiaX = this.player.inertiaX/1.15;
-                    this.player.inertiaY = this.player.inertiaY/1.15;
+                    this.player.inertiaX = this.player.inertiaX / 1.2;
+                    this.player.inertiaY = this.player.inertiaY / 1.2;
                     if (this.player.deathTimer > -1) {
                         this.player.deathTimer = this.player.deathTimer - 0.4;
                     }
                 }
             }
         }
+
+        //POWERS
+        if (this.usedTime > 105) {
+        for (let i = 0; i < this.powers.length; i++) {
+            let power = this.powers[i];
+            let dx = power.powerX - this.player.playerX;
+            let dy = power.powerY - this.player.playerY;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < power.mass / 2 + this.player.mass / 2 + 25) {
+                //console.log("entity collided with");
+                if (power.mass < this.player.mass - 2 && power.eaten == false && this.player.dead == false) {
+                    power.eaten = true;
+                    this.score = Math.ceil(this.score + (power.mass * 2));
+                    this.player.deathTimer = this.player.deathTimer + 50
+
+                } else if (this.powers[i].mass > this.player.mass + 2 && this.player.dead == false) {
+                    power.element.style.border = "3px solid rgb(120, 0, 0)";  //PLAYER DEATH
+                    this.player.inertiaX = this.player.inertiaX / 1.2;
+                    this.player.inertiaY = this.player.inertiaY / 1.2;
+                    if (this.player.deathTimer > -1) {
+                        this.player.deathTimer = this.player.deathTimer - 0.4;
+                    }
+                }
+            }
+        }
+    }
 
         //CHASERS
         for (let i = 0; i < this.chasers.length; i++) {
@@ -509,18 +559,19 @@ let Cell_Division = {
             let distance = Math.sqrt(dx * dx + dy * dy);
 
             if (distance < chaser.mass / 2 + this.player.mass / 2 + 25) {
-                console.log("entity collided with");
-                if (chaser.mass < this.player.mass - 2 && chaser.eaten == false) {
+                //console.log("entity collided with");
+                if (chaser.mass < this.player.mass - 2 && chaser.eaten == false && this.player.dead == false) {
                     this.player.mass = this.player.mass + (chaser.mass * 2) / this.player.mass
                     //this.container.children[i].remove();
                     chaser.eaten = true;
+                    this.smallerVirus = false;
                     this.score = Math.ceil(this.score + chaser.mass + 1);
-                    this.player.deathTimer = this.player.deathTimer + (chaser.mass/2);
+                    this.player.deathTimer = this.player.deathTimer + 10
 
-                } else if (this.chasers[i].mass > this.player.mass + 2) {
+                } else if (this.chasers[i].mass > this.player.mass + 2 && this.player.dead == false) {
                     chaser.element.style.border = "3px solid rgb(120, 0, 0)";
-                    this.player.inertiaX = this.player.inertiaX/1.1;
-                    this.player.inertiaY = this.player.inertiaY/1.1;     //PLAYER DEATH
+                    this.player.inertiaX = this.player.inertiaX / 1.1;
+                    this.player.inertiaY = this.player.inertiaY / 1.1;     //PLAYER DEATH
                     if (this.player.deathTimer > -1) {
                         this.player.deathTimer = this.player.deathTimer - 0.2;
                     }
@@ -536,24 +587,25 @@ let Cell_Division = {
     addTime: function () {
         this.frameTime = this.frameTime + 1;
         this.usedTime = this.frameTime / 40;
-        console.log("Used Time: " + this.usedTime);
-        console.log("Frame Time: " + this.frameTime);
+
+        //console.log("Used Time: " + this.usedTime);
+        //console.log("Frame Time: " + this.frameTime);
     },
 
     playerHealth: function () {
-        console.log("Health: " + this.player.deathTimer);
-        this.deathscreen.style.backgroundColor = "rgba(155, 0, 0, " + (0.5 - (this.player.deathTimer/200)) + ")";
+        //console.log("Health: " + this.player.deathTimer);
+        this.deathscreen.style.backgroundColor = "rgba(155, 0, 0, " + (0.5 - (this.player.deathTimer / 200)) + ")";
         if (this.usedTime % 1 == 0 && this.player.deathTimer > 0 && this.player.deathTimer < 100) {
             this.player.deathTimer = this.player.deathTimer + 1;             //Regeneration of player health
-            }
-            if (this.player.deathTimer > 100) {
-                this.player.deathTimer = 100;
-            }
-            if (this.player.deathTimer < 0 && this.player.dead == false) {
-                this.player.dead = true;
-                this.player.deathTimer = this.usedTime;
-            }
-        
+        }
+        if (this.player.deathTimer > 100) {
+            this.player.deathTimer = 100;
+        }
+        if (this.player.deathTimer < 0 && this.player.dead == false) {
+            this.player.dead = true;
+            this.player.deathTimer = this.usedTime;
+        }
+
     },
 
     wanderersDetect: function () {
@@ -567,7 +619,7 @@ let Cell_Division = {
             if (distance < wanderer.mass + this.player.mass + 100) {
                 //console.log("entity detected");
 
-                if (wanderer.mass > this.player.mass + 2) {
+                if (wanderer.mass > this.player.mass + 2 && this.player.dead == false) {
                     wanderer.targetX = this.player.playerX;
                     wanderer.targetY = this.player.playerY;
                     //console.log(wanderer.targetX)
@@ -584,38 +636,16 @@ let Cell_Division = {
             let dx = chaser.chaserX - this.player.playerX;
             let dy = chaser.chaserY - this.player.playerY;
             let distance = Math.sqrt(dx * dx + dy * dy);
-            console.log("selected");
+            //console.log("selected");
 
             if (distance < chaser.mass + this.player.mass + 200) {
-                console.log("entity detected");
+                //console.log("entity detected");
 
-                if (chaser.mass > this.player.mass + 2) {
+                if (chaser.mass > this.player.mass + 2 && this.player.dead == false) {
                     chaser.targetX = this.player.playerX;
                     chaser.targetY = this.player.playerY;
                     //console.log(chaser.targetX)
                     //console.log(chaser.targetY)
-                }
-            }
-        }
-
-    },
-
-    bouncersDetect: function () {
-        for (let i = 0; i < this.bouncers.length; i++) {
-            let bouncer = this.bouncers[i];
-            let dx = bouncer.bouncerX - this.player.playerX;
-            let dy = bouncer.bouncerY - this.player.playerY;
-            let distance = Math.sqrt(dx * dx + dy * dy);
-            console.log("selected");
-
-            if (distance < bouncer.mass + this.player.mass + 200) {
-                console.log("entity detected");
-
-                if (bouncer.mass > this.player.mass + 2) {
-                    bouncer.targetX = this.player.playerX;
-                    bouncer.targetY = this.player.playerY;
-                    //console.log(bouncer.targetX)
-                    //console.log(bouncer.targetY)
                 }
             }
         }
@@ -648,7 +678,7 @@ let Cell_Division = {
             if (wanderer.wandererY - wanderer.targetY < 50 && wanderer.wandererY - wanderer.targetY > -50 && wanderer.wandererX - wanderer.targetX < 50 && wanderer.wandererX - wanderer.targetX > -50) {
                 wanderer.energy = wanderer.energy + 1;
             }
-            console.log("energy: " + wanderer.energy);
+            //console.log("energy: " + wanderer.energy);
 
             if (wanderer.energy >= wanderer.maxEnergy) {
                 wanderer.targetX = Math.random() * (1450 - (wanderer.mass * 2)) + wanderer.mass;                 //HERE Math.random() *
@@ -689,6 +719,7 @@ let Cell_Division = {
             if (bouncer.bouncerX <= 0 + bouncer.mass / 2 && bouncer.inertiaX < 0) {     //Bounce on both walls
                 bouncer.inertiaX = bouncer.inertiaX * -1;
             }
+            //console.log("Bouncer Mass: " + bouncer.mass);
         }
 
     },
@@ -719,7 +750,7 @@ let Cell_Division = {
             if (chaser.chaserY - chaser.targetY < 50 && chaser.chaserY - chaser.targetY > -50 && chaser.chaserX - chaser.targetX < 50 && chaser.chaserX - chaser.targetX > -50) {
                 chaser.energy = chaser.energy + 1;
             }
-            console.log("chaser energy: " + chaser.energy);
+            //console.log("chaser energy: " + chaser.energy);
 
             if (chaser.energy >= chaser.maxEnergy) {
                 chaser.targetX = Math.random() * (1450 - (chaser.mass * 2)) + chaser.mass;                 //HERE Math.random() *
@@ -767,33 +798,33 @@ let Cell_Division = {
                 }
             }
         } else {
-            if (powerWanderer.powerX > 1268 + powerWanderer.mass) {
+            if (powerWanderer.powerX > 1268 + powerWanderer.mass/2) {
                 powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
                 powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
             } else {
-                powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2;
+                powerWanderer.powerX = powerWanderer.powerX + 2;
                 powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
             }
-            if (powerWanderer.powerY < 255 - powerWanderer.mass) {
+            if (powerWanderer.powerY < 255 - powerWanderer.mass/2) {
                 powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
                 powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
             } else {
                 powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
-                powerWanderer.powerY = powerWanderer.powerY + Math.random() * -2;
+                powerWanderer.powerY = powerWanderer.powerY -2;
             }
-            if (powerWanderer.powerX < 1500 - powerWanderer.mass) {
+            if (powerWanderer.powerX < 1500 - powerWanderer.mass/2) {
                 powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
                 powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
             } else {
-                powerWanderer.powerX = powerWanderer.powerX + Math.random() * -2;
+                powerWanderer.powerX = powerWanderer.powerX -2;
                 powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
             }
-            if (powerWanderer.powerY > 0 + powerWanderer.mass) {
+            if (powerWanderer.powerY > 0 + powerWanderer.mass/2) {
                 powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
                 powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
             } else {
                 powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
-                powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2;
+                powerWanderer.powerY = powerWanderer.powerY + 2;
             }
         }
 
@@ -809,6 +840,159 @@ let Cell_Division = {
         }
         if (powerWanderer.powerX <= 0 + powerWanderer.mass / 2 && powerWanderer.inertiaX < 0) {     //Bounce on both walls
             powerWanderer.inertiaX = powerWanderer.inertiaX * -1;
+        }
+    },
+
+    secondPowerMove: function () {
+        let powerChaser = this.powers[1];
+        if (this.player.mass >= 85) {
+            if (this.usedTime % 5 == 0) {
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////BOSS FOLLOWING AI////////////////////////////////
+//Quick note:
+//I know that this code here below this text may not look like a lot, but I spent at least 5 hours just thinking and working on it, creating a mathematical function for it
+//Out of the entire project, this is probably the peice of code (besides maybe the inertia for the player movement) that I am most proud of. The only outside tool I used
+//to create this specific peice of code was the point slope equation from math class, which isn't really something I have to credit. Other than that, I sat here and tested
+//both parts of every quadrant, tweaking it and checking it as I went. Though this took me way longer than it should've, I'm still pround of it. For those who haven't tried
+//to get an entity to follow you on a specific line with a non-changing speed, I can tell you that it was increadibly difficult, and you should just use something like 
+//the code below to get it. Anyways, it is now around 3:00am, and I'm tired. Good night.
+
+                let slope = (powerChaser.powerY - this.player.playerY)/(powerChaser.powerX - this.player.playerX);    //the slope
+                console.log("slope: " + slope);
+
+                //Checks the quadrant the player is in relative to the PowerChaser
+                if (this.player.playerY < powerChaser.powerY && this.player.playerX < powerChaser.powerX) {           //quadrant 3
+                    if (slope >= 1) {
+                        powerChaser.inertiaX = -powerChaser.speed * (slope/(slope * slope));
+                        powerChaser.inertiaY = -powerChaser.speed;
+                    } else if (slope < 1 && slope > 0) {
+                        powerChaser.inertiaX = -powerChaser.speed;
+                        powerChaser.inertiaY = -powerChaser.speed * slope;
+                    }
+                } else if (this.player.playerY >= powerChaser.powerY && this.player.playerX < powerChaser.powerX) {    //quadrant 2
+                    if (slope <= -1) {
+                        powerChaser.inertiaX = powerChaser.speed * (slope/(slope * slope));
+                        powerChaser.inertiaY = powerChaser.speed;
+                    } else if (slope > -1 && slope < 0) {
+                        powerChaser.inertiaX = -powerChaser.speed;
+                        powerChaser.inertiaY = -powerChaser.speed * slope;
+                    }
+                } else if (this.player.playerY >= powerChaser.powerY && this.player.playerX >= powerChaser.powerX) {    //quadrant 1
+                    if (slope >= 1) {
+                        powerChaser.inertiaX = powerChaser.speed * (slope/(slope * slope));
+                        powerChaser.inertiaY = powerChaser.speed;
+                    } else if (slope < 1 && slope > 0) {
+                        powerChaser.inertiaX = powerChaser.speed;
+                        powerChaser.inertiaY = powerChaser.speed * slope;
+                    }
+                } else if (this.player.playerY < powerChaser.powerY && this.player.playerX >= powerChaser.powerX) {    //quadrant 4
+                    if (slope <= -1) {
+                        powerChaser.inertiaX = -powerChaser.speed * (slope/(slope * slope));
+                        powerChaser.inertiaY = -powerChaser.speed;
+                    } else if (slope > -1 && slope < 0) {
+                        powerChaser.inertiaX = powerChaser.speed;
+                        powerChaser.inertiaY = powerChaser.speed * slope;
+                    }
+                }////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            } else {
+                console.log(powerChaser.inertiaX);
+                console.log(powerChaser.inertiaY);
+                powerChaser.powerX = powerChaser.powerX + powerChaser.inertiaX;
+                powerChaser.powerY = powerChaser.powerY + powerChaser.inertiaY;
+            }
+        } else {
+            if (powerChaser.powerX > 1268 + powerChaser.mass/2) {
+                powerChaser.powerX = powerChaser.powerX + Math.random() * 2 - 1;
+                powerChaser.powerY = powerChaser.powerY + Math.random() * 2 - 1;
+            } else {
+                powerChaser.powerX = powerChaser.powerX + 2;
+                powerChaser.powerY = powerChaser.powerY + Math.random() * 2 - 1;
+            }
+            if (powerChaser.powerY < 437 - powerChaser.mass/2 + 12.5) {
+                powerChaser.powerX = powerChaser.powerX + Math.random() * 2 - 1;
+                powerChaser.powerY = powerChaser.powerY + Math.random() * 2 - 1;
+            } else {
+                powerChaser.powerX = powerChaser.powerX + Math.random() * 2 - 1;
+                powerChaser.powerY = powerChaser.powerY -2;
+            }
+            if (powerChaser.powerX < 1470 - powerChaser.mass/2) {
+                powerChaser.powerX = powerChaser.powerX + Math.random() * 2 - 1;
+                powerChaser.powerY = powerChaser.powerY + Math.random() * 2 - 1;
+            } else {
+                powerChaser.powerX = powerChaser.powerX -2;
+                powerChaser.powerY = powerChaser.powerY + Math.random() * 2 - 1;
+            }
+            if (powerChaser.powerY > 234 + powerChaser.mass/2) {
+                powerChaser.powerX = powerChaser.powerX + Math.random() * 2 - 1;
+                powerChaser.powerY = powerChaser.powerY + Math.random() * 2 - 1;
+            } else {
+                powerChaser.powerX = powerChaser.powerX + Math.random() * 2 - 1;
+                powerChaser.powerY = powerChaser.powerY + 2;
+            }
+        }
+
+        //bouncing on walls
+        if (powerChaser.powerY >= 670 - powerChaser.mass / 2 && powerChaser.inertiaY > 0) {     //Bounce on ceiling and floor
+            powerChaser.inertiaY = powerChaser.inertiaY * -1;
+        }
+        if (powerChaser.powerX >= 1470 - powerChaser.mass / 2 && powerChaser.inertiaX > 0) {     //Bounce on both walls
+            powerChaser.inertiaX = powerChaser.inertiaX * -1;
+        }
+        if (powerChaser.powerY <= 0 + powerChaser.mass / 2 && powerChaser.inertiaY < 0) {     //Bounce on ceiling and floor
+            powerChaser.inertiaY = powerChaser.inertiaY * -1;
+        }
+        if (powerChaser.powerX <= 0 + powerChaser.mass / 2 && powerChaser.inertiaX < 0) {     //Bounce on both walls
+            powerChaser.inertiaX = powerChaser.inertiaX * -1;
+        }
+    },
+
+    thirdPowerMove: function () {
+        let powerBouncer = this.powers[2];
+        if (this.player.mass >= 135) {
+            powerBouncer.powerX = powerBouncer.powerX + powerBouncer.inertiaX;
+            powerBouncer.powerY = powerBouncer.powerY + powerBouncer.inertiaY;
+        } else {
+            if (powerBouncer.powerX > 1268 + powerBouncer.mass/2) {
+                powerBouncer.powerX = powerBouncer.powerX + Math.random() * 2 - 1;
+                powerBouncer.powerY = powerBouncer.powerY + Math.random() * 2 - 1;
+            } else {
+                powerBouncer.powerX = powerBouncer.powerX + 2;
+                powerBouncer.powerY = powerBouncer.powerY + Math.random() * 2 - 1;
+            }
+            if (powerBouncer.powerY < 670 - powerBouncer.mass/2) {
+                powerBouncer.powerX = powerBouncer.powerX + Math.random() * 2 - 1;
+                powerBouncer.powerY = powerBouncer.powerY + Math.random() * 2 - 1;
+            } else {
+                powerBouncer.powerX = powerBouncer.powerX + Math.random() * 2 - 1;
+                powerBouncer.powerY = powerBouncer.powerY -2;
+            }
+            if (powerBouncer.powerX < 1470 - powerBouncer.mass/2) {
+                powerBouncer.powerX = powerBouncer.powerX + Math.random() * 2 - 1;
+                powerBouncer.powerY = powerBouncer.powerY + Math.random() * 2 - 1;
+            } else {
+                powerBouncer.powerX = powerBouncer.powerX -2;
+                powerBouncer.powerY = powerBouncer.powerY + Math.random() * 2 - 1;
+            }
+            if (powerBouncer.powerY > 467 + powerBouncer.mass/2) {
+                powerBouncer.powerX = powerBouncer.powerX + Math.random() * 2 - 1;
+                powerBouncer.powerY = powerBouncer.powerY + Math.random() * 2 - 1;
+            } else {
+                powerBouncer.powerX = powerBouncer.powerX + Math.random() * 2 - 1;
+                powerBouncer.powerY = powerBouncer.powerY + 2;
+            }
+        }
+
+        //bouncing on walls
+        if (powerBouncer.powerY >= 670 - powerBouncer.mass / 2 && powerBouncer.inertiaY > 0) {     //Bounce on ceiling and floor
+            powerBouncer.inertiaY = powerBouncer.inertiaY * -1;
+        }
+        if (powerBouncer.powerX >= 1470 - powerBouncer.mass / 2 && powerBouncer.inertiaX > 0) {     //Bounce on both walls
+            powerBouncer.inertiaX = powerBouncer.inertiaX * -1;
+        }
+        if (powerBouncer.powerY <= 0 + powerBouncer.mass / 2 && powerBouncer.inertiaY < 0) {     //Bounce on ceiling and floor
+            powerBouncer.inertiaY = powerBouncer.inertiaY * -1;
+        }
+        if (powerBouncer.powerX <= 0 + powerBouncer.mass / 2 && powerBouncer.inertiaX < 0) {     //Bounce on both walls
+            powerBouncer.inertiaX = powerBouncer.inertiaX * -1;
         }
     },
 
@@ -906,6 +1090,14 @@ let Cell_Division = {
             this.chasers[i].chaserY = this.chasers[i].chaserY + this.chasers[i].inertiaY;
             this.chasers[i].chaserX = this.chasers[i].chaserX + this.chasers[i].inertiaX;
         }
+
+        //bouncers
+        for (let i = 0; i < this.bouncers.length; i++) {
+            this.bouncers[i].bouncerY = this.bouncers[i].bouncerY + this.bouncers[i].inertiaY;
+            this.bouncers[i].bouncerX = this.bouncers[i].bouncerX + this.bouncers[i].inertiaX;
+            //console.log(this.bouncers[i].bouncerX);
+            //console.log(this.bouncers[i].bouncerY);
+        }
     },
 
     renderEntities: function () {
@@ -931,17 +1123,16 @@ let Cell_Division = {
             this.wanderers[i].element.style.zIndex = this.wanderers[i].mass;
             if (this.wanderers[i].mass < this.player.mass - 2 && this.wanderers[i].eaten == false) {
                 this.wanderers[i].element.style.border = "3px solid rgba(0, 0, 40, 1)";
-                this.wanderers[i].element.style.backgroundColor = "rgba(0, 83, 14, 1);";
+                this.smallerVirus = true;
+
             } else if (this.wanderers[i].mass > this.player.mass + 2 && this.wanderers[i].eaten == false) {
-                console.log("here");
+                //console.log("here");
                 this.wanderers[i].element.style.border = "3px solid rgba(40, 0, 0, 1)";
-                this.wanderers[i].element.style.backgroundColor = "rgba(0, 83, 14, 1);";
-                console.log("but not here");
+                //console.log("but not here");
             } else if (this.wanderers[i].mass < this.player.mass + 2 && this.wanderers[i].mass > this.player.mass - 2 && this.wanderers[i].eaten == false) {
                 this.wanderers[i].element.style.border = "3px solid rgba(0, 0, 0, 1)";
-                this.wanderers[i].element.style.backgroundColor = "3px solid rgba(0, 83, 14, 1);";  //WHAT IS GOING ON HERE??!??!? Why does the color not change?
-                console.log(this.wanderers[i].element.style.backgroundColor);        //why is the border special?????
-                console.log(this.wanderers[i].element.style.border); //this makes a good 0 sense.
+                //console.log(this.wanderers[i].element.style.backgroundColor);
+                //console.log(this.wanderers[i].element.style.border);
             } else {
                 this.wanderers[i].element.style.border = "rgba(0, 0, 0, 0)";
                 this.wanderers[i].element.style.backgroundColor = "rgba(0, 83, 14, 0.2)";
@@ -958,6 +1149,7 @@ let Cell_Division = {
             this.chasers[i].element.style.zIndex = this.chasers[i].mass;
             if (this.chasers[i].mass < this.player.mass - 2 && this.chasers[i].eaten == false) {
                 this.chasers[i].element.style.border = "3px solid rgb(0, 0, 40)";
+                this.smallerVirus = true;
 
             } else if (this.chasers[i].mass > this.player.mass + 2 && this.chasers[i].eaten == false) {
                 this.chasers[i].element.style.border = "3px solid rgb(40, 0, 0)";
@@ -972,13 +1164,14 @@ let Cell_Division = {
 
         //bouncers
         for (let i = 0; i < this.bouncers.length; i++) {
-            this.bouncers[i].element.style.top = this.bouncers[i].chaserY - (this.bouncers[i].mass / 2) + "px";
-            this.bouncers[i].element.style.left = this.bouncers[i].chaserX - (this.bouncers[i].mass / 2) + "px";
+            this.bouncers[i].element.style.top = this.bouncers[i].bouncerY - (this.bouncers[i].mass / 2) + "px";
+            this.bouncers[i].element.style.left = this.bouncers[i].bouncerX - (this.bouncers[i].mass / 2) + "px";
             this.bouncers[i].element.style.height = (this.bouncers[i].mass + 25) + "px";
             this.bouncers[i].element.style.width = (this.bouncers[i].mass + 25) + "px";
             this.bouncers[i].element.style.zIndex = this.bouncers[i].mass;
             if (this.bouncers[i].mass < this.player.mass - 2 && this.bouncers[i].eaten == false) {
                 this.bouncers[i].element.style.border = "3px solid rgb(0, 0, 40)";
+                this.smallerVirus = true;
 
             } else if (this.bouncers[i].mass > this.player.mass + 2 && this.bouncers[i].eaten == false) {
                 this.bouncers[i].element.style.border = "3px solid rgb(40, 0, 0)";
@@ -986,7 +1179,7 @@ let Cell_Division = {
                 this.bouncers[i].element.style.border = "3px solid rgb(0, 0, 0)";
             } else {
                 this.bouncers[i].element.style.border = "rgba(0, 0, 0, 0)";
-                this.bouncers[i].element.style.backgroundColor = "rgba(83, 0, 0, 0.2)";
+                this.bouncers[i].element.style.backgroundColor = "rgba(166, 166, 0, 0.2)";
                 this.bouncers[i].element.style.zIndex = 0;
             }
         }
@@ -998,18 +1191,23 @@ let Cell_Division = {
             this.powers[i].element.style.height = (this.powers[i].mass + 25) + "px";
             this.powers[i].element.style.width = (this.powers[i].mass + 25) + "px";
             this.powers[i].element.style.zIndex = this.powers[i].mass;
-            if (this.powers[i].mass < this.player.mass - 2) {
+            if (this.powers[i].mass < this.player.mass - 2 && this.powers[i].eaten == false) {
                 this.powers[i].element.style.border = "3px solid rgb(0, 0, 40)";
+                this.smallerVirus = true;
 
-            } else if (this.powers[i].mass > this.player.mass + 2) {
+            } else if (this.powers[i].mass > this.player.mass + 2 && this.powers[i].eaten == false) {
                 this.powers[i].element.style.border = "3px solid rgb(40, 0, 0)";
-            } else {
+            } else if (this.powers[i].mass < this.player.mass + 2 && this.powers[i].mass > this.player.mass - 2 && this.powers[i].eaten == false) {
                 this.powers[i].element.style.border = "3px solid rgb(0, 0, 0)";
+            } else {
+                this.powers[i].element.style.border = "rgba(0, 0, 0, 0)";
+                this.powers[i].element.style.backgroundColor = "rgba(6, 15, 20, 0.2)";
+                this.powers[i].element.style.zIndex = 0;
             }
         }
 
         //Score and HighScore
-        console.log("Score = " + this.score);
+        //console.log("Score = " + this.score);
         document.getElementById("score_box").innerHTML = "<h3> Score: " + this.score + "</h3>";
         //document.getElementById("score_box").innerHTML = "<h3> Highscore: " + this.highscore + "</h3><h3> Score: " + this.score + "</h3>";
         //if (this.score > this.highscore) {
