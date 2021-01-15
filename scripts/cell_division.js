@@ -169,7 +169,7 @@ let Cell_Division = {
         bouncerdiv.className = "bouncer";
         this.container.append(bouncerdiv);
         let bouncer = {
-            mass: Math.ceil(Math.random() * (this.maxBouncerSize - 35) + 35),
+            mass: Math.ceil(Math.random() * (this.maxBouncerSize - 50) + 50),
             bouncerX: this.powers[2].powerX,
             bouncerY: this.powers[2].powerY,
             inertiaX: Math.random() * 3 + 3,
@@ -345,8 +345,8 @@ let Cell_Division = {
                 this.bouncers.push(this.createBouncer());
             }
         }
-        if (this.usedTime > 109 && this.usedTime % 5 == 0 && this.smallerVirus == false) {
-            if (this.player.mass >= 135 && this.player.mass < 150) {
+        if (this.usedTime > 109 && this.usedTime % 5 == 0) {
+            if (this.player.mass >= 130 && this.player.mass < 175) {
                 this.chaserSpawn = 2;
                 this.wandererSpawn = 2;
                 this.maxChaserSize = 140;
@@ -553,7 +553,7 @@ let Cell_Division = {
                         this.player.mass = this.player.mass + wanderer.mass
                     }
                     if (this.player.mass > 8) {
-                        this.player.mass = this.player.mass + (wanderer.mass * 2) / this.player.mass
+                        this.player.mass = this.player.mass + (wanderer.mass * 2) / this.player.mass + 0.5
                     }
                     //this.container.children[i].remove();
                     wanderer.eaten = true;
@@ -581,12 +581,7 @@ let Cell_Division = {
             if (distance < bouncer.mass / 2 + this.player.mass / 2 + 25) {
                 //console.log("entity collided with");
                 if (bouncer.mass < this.player.mass - 2 && bouncer.eaten == false && this.player.dead == false) {
-                    if (this.player.mass <= 8) {
-                        this.player.mass = this.player.mass + bouncer.mass
-                    }
-                    if (this.player.mass > 8) {
-                        this.player.mass = this.player.mass + (bouncer.mass * 2) / this.player.mass
-                    }
+                        this.player.mass = this.player.mass + (bouncer.mass * 2) / this.player.mass + 0.5
                     //this.container.children[i].remove();
                     bouncer.eaten = true;
                     this.score = Math.ceil(this.score + bouncer.mass);
@@ -643,7 +638,7 @@ let Cell_Division = {
             if (distance < chaser.mass / 2 + this.player.mass / 2 + 25) {
                 //console.log("entity collided with");
                 if (chaser.mass < this.player.mass - 2 && chaser.eaten == false && this.player.dead == false) {
-                    this.player.mass = this.player.mass + (chaser.mass * 2) / this.player.mass
+                    this.player.mass = this.player.mass + (chaser.mass * 2) / this.player.mass + 0.5
                     //this.container.children[i].remove();
                     chaser.eaten = true;
                     this.smallerVirus = false;
@@ -894,7 +889,7 @@ let Cell_Division = {
                 powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
                 powerWanderer.powerY = powerWanderer.powerY - 2;
             }
-            if (powerWanderer.powerX < 1500 - powerWanderer.mass / 2) {
+            if (powerWanderer.powerX < 1470 - powerWanderer.mass / 2) {
                 powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
                 powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
             } else {
