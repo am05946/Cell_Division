@@ -14,10 +14,12 @@ let Cell_Division = {
     container: document.getElementById("playing_screen"),
     tutorialText: document.getElementById("tutorial"),
     deathscreen: document.getElementById("death_view"),
+    winscreen: document.getElementById("win_screen"),
     titleText: document.getElementById("title_text"),
     usedTime: 0,
     frameTime: 0,
     score: 0,
+    finalTime: 0,
     //highscore: 0,
     wandererSpawn: 0,
     chaserSpawn: 1,
@@ -229,37 +231,92 @@ let Cell_Division = {
 
     animateGame: function () {
         console.log(this.smallerVirus)
-        this.moveEntities();
         this.renderEntities();
         //this.challengeInertia();
-        this.collision();
-        this.playerMovement();
-        this.wanderersDetect();
-        this.wanderersMove();
-        this.chasersMove();
-        this.chasersDetect();
-        this.bouncersMove();
         this.addTime();
-        this.playerHealth();
-        this.fade();
-        this.spawners();
+        if (this.powers[2].eaten == false) {
+            this.moveEntities();
+            this.collision();
+            this.playerMovement();
+            this.wanderersDetect();
+            this.wanderersMove();
+            this.chasersMove();
+            this.chasersDetect();
+            this.bouncersMove();
+            this.playerHealth();
+            this.fade();
+            this.spawners();
+            this.firstPowerMove();
+            this.secondPowerMove();
+            this.thirdPowerMove();
+            this.finalTime = this.usedTime;
+        }
+        console.log(this.usedTime);
+        if (this.powers[2].eaten == true && this.maxChaserSize == 95) {
+            this.finalTime = this.usedTime;
+            this.maxChaserSize = 100;
+
+        }
         this.death();
         //console.log("Current Mass: " + this.player.mass);
         //console.log("Dead?: " + this.player.dead);
-        this.firstPowerMove();
-        this.secondPowerMove();
-        this.thirdPowerMove();
         if (this.powers[2].eaten == true) {
             this.win();
         }
-        //this.player.mass = this.player.mass + 0.01;                           //<---------- USE WHEN TESTING 
+        //this.player.mass = this.player.mass + 0.05;                           //<---------- USE WHEN TESTING LATE GAME
         if (this.player.deathTimer < 0) {
             this.death();
         }
     },
 
     win: function () {
-
+        for (let i = 0; i < this.wanderers.length; i++) {
+            this.wanderers[i].element.style.backgroundColor = "rgb(0,0,0,0)"
+            this.wanderers[i].element.style.border = "rgb(0,0,0,0)"
+        }
+        for (let i = 0; i < this.chasers.length; i++) {
+            this.chasers[i].element.style.backgroundColor = "rgb(0,0,0,0)"
+            this.chasers[i].element.style.border = "rgb(0,0,0,0)"
+        }
+        for (let i = 0; i < this.bouncers.length; i++) {
+            this.bouncers[i].element.style.backgroundColor = "rgb(0,0,0,0)"
+            this.bouncers[i].element.style.border = "rgb(0,0,0,0)"
+        }
+        this.player.element.style.backgroundColor = "rgba(0, 0, 0, 0)";
+        this.player.element.style.border = "3px solid rgba(0, 0, 0, 0)";
+        this.wanderzone.style.backgroundColor = "rgba(0,0,0, 0)";
+        this.wanderzone.style.border = "3px dashed rgba(0,0,0, 0)";
+        this.bouncerzone.style.backgroundColor = "rgba(0,0,0, 0)";
+        this.bouncerzone.style.border = "3px dashed rgba(0,0,0, 0)";
+        this.chaserzone.style.backgroundColor = "rgba(0,0,0, 0)";
+        this.chaserzone.style.border = "3px dashed rgba(0,0,0, 0)";
+        this.deathscreen.style.backgroundColor = "rgba(0,0,0, 1)";
+        this.player.dead = true;
+        console.log("Final Time: " + this.finalTime)
+        if (this.usedTime - this.finalTime < 6 && this.usedTime - this.finalTime > 3) {
+            this.winscreen.style.color = "rgba(255, 255, 255, " + ((this.usedTime - this.finalTime - 3) / 3) + ")";
+        }
+        if (this.usedTime - this.finalTime < 12 && this.usedTime - this.finalTime > 9) {
+            this.winscreen.style.color = "rgba(255, 255, 255, " + (1 - (this.usedTime - this.finalTime - 9) / 3) + ")";
+        }
+        if (this.usedTime - this.finalTime < 15 && this.usedTime - this.finalTime > 12) {
+            this.winscreen.style.color = "rgba(255, 255, 255, " + ((this.usedTime - this.finalTime - 12) / 3) + ")";
+            document.getElementById("win_screen").innerHTML = "<h4>You have defeated the last of the main virus cells</h4>";
+        }
+        if (this.usedTime - this.finalTime < 21 && this.usedTime - this.finalTime > 18) {
+            this.winscreen.style.color = "rgba(255, 255, 255, " + (1 - (this.usedTime - this.finalTime - 18) / 3) + ")";
+        }
+        if (this.usedTime - this.finalTime < 24 && this.usedTime - this.finalTime > 21) {
+            this.winscreen.style.color = "rgba(255, 255, 255, " + ((this.usedTime - this.finalTime - 21) / 3) + ")";
+            document.getElementById("win_screen").innerHTML = "<h4>Without their leaders, the viruses died off</h4><h4>and the host was cured</h4>";
+        }
+        if (this.usedTime - this.finalTime < 30 && this.usedTime - this.finalTime > 27) {
+            this.winscreen.style.color = "rgba(255, 255, 255, " + (1 - (this.usedTime - this.finalTime - 27) / 3) + ")";
+        }
+        if (this.usedTime - this.finalTime > 30) {
+            this.winscreen.style.color = "rgba(255, 255, 255, " + ((this.usedTime - this.finalTime - 30) / 3) + ")";
+            document.getElementById("win_screen").innerHTML = "<h4>You have finally won.</h4><h4>Your final score was: " + this.score + "</h4>";
+        }
     },
 
     spawners: function () {
@@ -302,6 +359,9 @@ let Cell_Division = {
                     this.bouncers.push(this.createBouncer());
                 }
             }
+        }
+        if (this.usedTime % 10 == 0) {
+            this.smallerVirus = false;
         }
     },
 
@@ -559,6 +619,7 @@ let Cell_Division = {
                         this.score = Math.ceil(this.score + (power.mass * 2));
                         this.player.deathTimer = this.player.deathTimer + 50
                         this.smallerVirus = false;
+                        this.player.mass = this.player.mass + 10;
 
                     } else if (this.powers[i].mass > this.player.mass + 2 && this.player.dead == false) {
                         power.element.style.border = "3px solid rgb(120, 0, 0)";  //PLAYER DEATH

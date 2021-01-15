@@ -93,6 +93,18 @@ blue {
     left: 500px;
 }
 
+#win_screen {
+    user-select: none;
+    font-size:2em;
+    width: 500px;
+    height: 50px;
+    position: absolute;
+    text-align: center;
+    color: rgba(255, 255, 255, 0);
+    top: 200px;
+    left: 700px;
+}
+
 #death_view {
     top: 0px;
     left: 0px;
