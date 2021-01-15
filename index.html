@@ -1,5 +1,4 @@
 <head>
-    <audio id="music"> <source src="Yeah.mp3" type="audio"></audio>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles/styles.css">
@@ -9,10 +8,13 @@
 <body>
     <div id="cell_div">
         <div id="playing_screen">
-            <div id = "score_box">
-                <h3> Highscore:</h3>
+            <div id="score_box">
+                <!--<h3> Highscore:</h3>-->
                 <h3> Score:</h3>
             </div>
+            <div id = "title_text">
+                <gameName>Bullet Cell</gameName>
+                </div>
             <div id="tutorial">
                 <h2>Use WASD to move around</h2>
             </div>
@@ -26,7 +28,7 @@
             </div>
             <div id="chaser_zone">
             </div>
-            <div id="split_zone">
+            <div id="bouncer_zone">
             </div>
             <div id="power">
             </div>
@@ -37,6 +39,12 @@
                 <h1>SKIP</h1>
             </div>
         </div>
+        <div id="death_view">
+        </div>
+        <div id="win_screen">
+            <h4> Congratulations </h4>
+        </div>
+
     </div>
     <script src="scripts/cell_division.js"></script>
 </body>

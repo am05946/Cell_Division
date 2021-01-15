@@ -15,6 +15,18 @@ h1 {
     user-select: none;
 }
 
+
+gameName {
+    text-align: center;
+    margin: 10% 10% 10% 10%;
+    user-select: none;
+    width: 1500px;
+    height: 700px;
+    position: relative;
+    font-size:5em;
+    font-family: fantasy;
+}
+
 h2 {
     text-align: center;
     margin: 10% 10% 10% 10%;
@@ -56,6 +68,9 @@ blue {
    }
 */
 
+#title_text {
+    color: black;
+}
 
 #playing_screen {
     width: 1500px;
@@ -69,8 +84,35 @@ blue {
 }
 
 #tutorial {
+    width: 500px;
+    height: 50px;
+    position: absolute;
     text-align: center;
-    color: rgba(0, 0, 0, 0)
+    color: rgba(0, 0, 0, 0);
+    top: 150px;
+    left: 500px;
+}
+
+#win_screen {
+    user-select: none;
+    font-size:2em;
+    width: 500px;
+    height: 50px;
+    position: absolute;
+    text-align: center;
+    color: rgba(255, 255, 255, 0);
+    top: 200px;
+    left: 700px;
+}
+
+#death_view {
+    top: 0px;
+    left: 0px;
+    position: absolute;
+    width: 0px;
+    height: 0px;
+    text-align: center;
+    background: rgba(255, 0, 0, 1);
 }
 
 #start_button {
@@ -131,7 +173,7 @@ blue {
     left: 1268px;
 }
 
-#split_zone {
+#bouncer_zone {
     width: 225px;
     height: 225px;
     border: 3px solid rgba(255,255,0,0);
@@ -187,3 +229,13 @@ blue {
     left: 500px;
 }
 
+.bouncer {
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    background-color: rgb(166, 166, 0);
+    border: 3px solid rgb(0, 0, 0);
+    position: absolute;
+    top: -250px;
+    left: -500px;
+}
