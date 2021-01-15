@@ -14,10 +14,13 @@ let Cell_Division = {
     container: document.getElementById("playing_screen"),
     tutorialText: document.getElementById("tutorial"),
     deathscreen: document.getElementById("death_view"),
+    titleText: document.getElementById("title_text"),
     usedTime: 0,
     frameTime: 0,
     score: 0,
-    highscore: 0,
+    //highscore: 0,
+    wandererSpawn: 0,
+    chaserSpawn: 1,
     maxChaserSize: 60,
     maxBouncerSize: 110,
     gamestart: false,
@@ -37,7 +40,7 @@ let Cell_Division = {
         for (let i = 0; i < 3; i++) {
             this.powers.push(this.createPower())
         }
-        document.getElementById("score_box").innerHTML = "<h3> Highscore: " + this.highscore + "</h3><h3> Score: " + this.score + "</h3>";
+        document.getElementById("score_box").innerHTML = "<h3> Score: " + this.score + "</h3>";     //<h3> Highscore: " + this.highscore + "</h3>
 
         window.onkeydown = function (event) {
             //if (this.player.dead == false) {
@@ -142,8 +145,8 @@ let Cell_Division = {
         this.container.append(wanderdiv);
         let wanderer = {
             mass: Math.ceil(Math.random() * 45),
-            wandererX: this.powers[0].powerX,
-            wandererY: this.powers[0].powerY,
+            wandererX: this.powers[this.wandererSpawn].powerX,
+            wandererY: this.powers[this.wandererSpawn].powerY,
             inertiaX: -1,
             inertiaY: -1,
             friction: 1,
@@ -183,8 +186,8 @@ let Cell_Division = {
         this.container.append(chaserdiv);
         let chaser = {
             mass: Math.ceil(Math.random() * this.maxChaserSize),
-            chaserX: this.powers[1].powerX,
-            chaserY: this.powers[1].powerY,
+            chaserX: this.powers[this.chaserSpawn].powerX,
+            chaserY: this.powers[this.chaserSpawn].powerY,
             inertiaX: 0,
             inertiaY: 0,
             friction: 1,
@@ -246,10 +249,17 @@ let Cell_Division = {
         this.firstPowerMove();
         this.secondPowerMove();
         this.thirdPowerMove();
-        this.player.mass = this.player.mass + 0.1;                           //<---------- USE WHEN TESTING 
+        if (this.powers[2].eaten == true) {
+            this.win();
+        }
+        //this.player.mass = this.player.mass + 0.01;                           //<---------- USE WHEN TESTING 
         if (this.player.deathTimer < 0) {
             this.death();
         }
+    },
+
+    win: function () {
+
     },
 
     spawners: function () {
@@ -273,14 +283,22 @@ let Cell_Division = {
                     this.bouncers.push(this.createBouncer());
                 }
             }
-            if (this.player.mass >= 100 && this.player.mass >= 150) {
+            if (this.player.mass >= 100 && this.player.mass < 135) {
                 this.maxBouncerSize = 145;
-                let random = Math.ceil(Math.random() * 3);
+                this.bouncers.push(this.createBouncer());
+            }
+        }
+        if (this.usedTime > 109 && this.usedTime % 5 == 0 && this.smallerVirus == false) {
+            if (this.player.mass >= 135 && this.player.mass < 150) {
+                this.chaserSpawn = 2;
+                this.wandererSpawn = 2;
+                this.maxChaserSize = 140;
+                let random = Math.ceil(Math.random() * 4);
                 if (random == 1) {
                     this.wanderers.push(this.createWanderer());
                 } else if (random == 2) {
                     this.chasers.push(this.createChaser());
-                } else if (random == 3) {
+                } else if (random >= 3) {
                     this.bouncers.push(this.createBouncer());
                 }
             }
@@ -290,7 +308,7 @@ let Cell_Division = {
     death: function () {
         if (this.player.dead == true) {
             let currentTime = this.player.deathTimer;
-            document.getElementById("tutorial").innerHTML = "<h2>You have died.</h2>"
+            document.getElementById("tutorial").innerHTML = "<h2>You have died.</h2><h2>Your final score was " + this.score + "</h2>"
             this.tutorialText.style.color = "rgba(0, 0, 0, " + ((this.usedTime - this.player.deathTimer) / 3) + ")";
             if (this.usedTime > currentTime + 5) {
                 this.deathscreen.style.top = 0 + "px";
@@ -314,6 +332,7 @@ let Cell_Division = {
 
     fade: function () {
         if (this.usedTime < 3.1) {
+            this.titleText.style.color = "rgba(0, 0, 0, " + (1 - this.usedTime / 3) + ")";
             this.startbutton.style.color = "rgba(0, 122, 170, " + (1 - this.usedTime / 3) + ")";
             this.startbutton.style.backgroundColor = "rgba(0, 70, 100, " + (1 - this.usedTime / 3) + ")";
             this.startbutton.style.borderTopColor = "rgba(0, 95, 136, " + (1 - this.usedTime / 3) + ")";
@@ -512,6 +531,7 @@ let Cell_Division = {
                     bouncer.eaten = true;
                     this.score = Math.ceil(this.score + bouncer.mass);
                     this.player.deathTimer = this.player.deathTimer + 15
+                    this.smallerVirus = false;
 
                 } else if (this.bouncers[i].mass > this.player.mass + 2 && this.player.dead == false) {
                     bouncer.element.style.border = "3px solid rgb(120, 0, 0)";  //PLAYER DEATH
@@ -526,30 +546,31 @@ let Cell_Division = {
 
         //POWERS
         if (this.usedTime > 105) {
-        for (let i = 0; i < this.powers.length; i++) {
-            let power = this.powers[i];
-            let dx = power.powerX - this.player.playerX;
-            let dy = power.powerY - this.player.playerY;
-            let distance = Math.sqrt(dx * dx + dy * dy);
+            for (let i = 0; i < this.powers.length; i++) {
+                let power = this.powers[i];
+                let dx = power.powerX - this.player.playerX;
+                let dy = power.powerY - this.player.playerY;
+                let distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < power.mass / 2 + this.player.mass / 2 + 25) {
-                //console.log("entity collided with");
-                if (power.mass < this.player.mass - 2 && power.eaten == false && this.player.dead == false) {
-                    power.eaten = true;
-                    this.score = Math.ceil(this.score + (power.mass * 2));
-                    this.player.deathTimer = this.player.deathTimer + 50
+                if (distance < power.mass / 2 + this.player.mass / 2 + 25) {
+                    //console.log("entity collided with");
+                    if (power.mass < this.player.mass - 2 && power.eaten == false && this.player.dead == false) {
+                        power.eaten = true;
+                        this.score = Math.ceil(this.score + (power.mass * 2));
+                        this.player.deathTimer = this.player.deathTimer + 50
+                        this.smallerVirus = false;
 
-                } else if (this.powers[i].mass > this.player.mass + 2 && this.player.dead == false) {
-                    power.element.style.border = "3px solid rgb(120, 0, 0)";  //PLAYER DEATH
-                    this.player.inertiaX = this.player.inertiaX / 1.2;
-                    this.player.inertiaY = this.player.inertiaY / 1.2;
-                    if (this.player.deathTimer > -1) {
-                        this.player.deathTimer = this.player.deathTimer - 0.4;
+                    } else if (this.powers[i].mass > this.player.mass + 2 && this.player.dead == false) {
+                        power.element.style.border = "3px solid rgb(120, 0, 0)";  //PLAYER DEATH
+                        this.player.inertiaX = this.player.inertiaX / 1.2;
+                        this.player.inertiaY = this.player.inertiaY / 1.2;
+                        if (this.player.deathTimer > -1) {
+                            this.player.deathTimer = this.player.deathTimer - 0.4;
+                        }
                     }
                 }
             }
         }
-    }
 
         //CHASERS
         for (let i = 0; i < this.chasers.length; i++) {
@@ -798,28 +819,28 @@ let Cell_Division = {
                 }
             }
         } else {
-            if (powerWanderer.powerX > 1268 + powerWanderer.mass/2) {
+            if (powerWanderer.powerX > 1268 + powerWanderer.mass / 2) {
                 powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
                 powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
             } else {
                 powerWanderer.powerX = powerWanderer.powerX + 2;
                 powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
             }
-            if (powerWanderer.powerY < 255 - powerWanderer.mass/2) {
+            if (powerWanderer.powerY < 255 - powerWanderer.mass / 2) {
                 powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
                 powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
             } else {
                 powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
-                powerWanderer.powerY = powerWanderer.powerY -2;
+                powerWanderer.powerY = powerWanderer.powerY - 2;
             }
-            if (powerWanderer.powerX < 1500 - powerWanderer.mass/2) {
+            if (powerWanderer.powerX < 1500 - powerWanderer.mass / 2) {
                 powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
                 powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
             } else {
-                powerWanderer.powerX = powerWanderer.powerX -2;
+                powerWanderer.powerX = powerWanderer.powerX - 2;
                 powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
             }
-            if (powerWanderer.powerY > 0 + powerWanderer.mass/2) {
+            if (powerWanderer.powerY > 0 + powerWanderer.mass / 2) {
                 powerWanderer.powerX = powerWanderer.powerX + Math.random() * 2 - 1;
                 powerWanderer.powerY = powerWanderer.powerY + Math.random() * 2 - 1;
             } else {
@@ -847,22 +868,22 @@ let Cell_Division = {
         let powerChaser = this.powers[1];
         if (this.player.mass >= 85) {
             if (this.usedTime % 5 == 0) {
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////BOSS FOLLOWING AI////////////////////////////////
-//Quick note:
-//I know that this code here below this text may not look like a lot, but I spent at least 5 hours just thinking and working on it, creating a mathematical function for it
-//Out of the entire project, this is probably the peice of code (besides maybe the inertia for the player movement) that I am most proud of. The only outside tool I used
-//to create this specific peice of code was the point slope equation from math class, which isn't really something I have to credit. Other than that, I sat here and tested
-//both parts of every quadrant, tweaking it and checking it as I went. Though this took me way longer than it should've, I'm still pround of it. For those who haven't tried
-//to get an entity to follow you on a specific line with a non-changing speed, I can tell you that it was increadibly difficult, and you should just use something like 
-//the code below to get it. Anyways, it is now around 3:00am, and I'm tired. Good night.
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////BOSS FOLLOWING AI////////////////////////////////
+                //Quick note:
+                //I know that this code here below this text may not look like a lot, but I spent at least 5 hours just thinking and working on it, creating a mathematical function for it
+                //Out of the entire project, this is probably the peice of code (besides maybe the inertia for the player movement) that I am most proud of. The only outside tool I used
+                //to create this specific peice of code was the point slope equation from math class, which isn't really something I have to credit. Other than that, I sat here and tested
+                //both parts of every quadrant, tweaking it and checking it as I went. Though this took me way longer than it should've, I'm still pround of it. For those who haven't tried
+                //to get an entity to follow you on a specific line with a non-changing speed, I can tell you that it was increadibly difficult, and you should just use something like 
+                //the code below to get it. Anyways, it is now around 3:00am, and I'm tired. Good night.
 
-                let slope = (powerChaser.powerY - this.player.playerY)/(powerChaser.powerX - this.player.playerX);    //the slope
+                let slope = (powerChaser.powerY - this.player.playerY) / (powerChaser.powerX - this.player.playerX);    //the slope
                 console.log("slope: " + slope);
 
                 //Checks the quadrant the player is in relative to the PowerChaser
                 if (this.player.playerY < powerChaser.powerY && this.player.playerX < powerChaser.powerX) {           //quadrant 3
                     if (slope >= 1) {
-                        powerChaser.inertiaX = -powerChaser.speed * (slope/(slope * slope));
+                        powerChaser.inertiaX = -powerChaser.speed * (slope / (slope * slope));
                         powerChaser.inertiaY = -powerChaser.speed;
                     } else if (slope < 1 && slope > 0) {
                         powerChaser.inertiaX = -powerChaser.speed;
@@ -870,7 +891,7 @@ let Cell_Division = {
                     }
                 } else if (this.player.playerY >= powerChaser.powerY && this.player.playerX < powerChaser.powerX) {    //quadrant 2
                     if (slope <= -1) {
-                        powerChaser.inertiaX = powerChaser.speed * (slope/(slope * slope));
+                        powerChaser.inertiaX = powerChaser.speed * (slope / (slope * slope));
                         powerChaser.inertiaY = powerChaser.speed;
                     } else if (slope > -1 && slope < 0) {
                         powerChaser.inertiaX = -powerChaser.speed;
@@ -878,7 +899,7 @@ let Cell_Division = {
                     }
                 } else if (this.player.playerY >= powerChaser.powerY && this.player.playerX >= powerChaser.powerX) {    //quadrant 1
                     if (slope >= 1) {
-                        powerChaser.inertiaX = powerChaser.speed * (slope/(slope * slope));
+                        powerChaser.inertiaX = powerChaser.speed * (slope / (slope * slope));
                         powerChaser.inertiaY = powerChaser.speed;
                     } else if (slope < 1 && slope > 0) {
                         powerChaser.inertiaX = powerChaser.speed;
@@ -886,7 +907,7 @@ let Cell_Division = {
                     }
                 } else if (this.player.playerY < powerChaser.powerY && this.player.playerX >= powerChaser.powerX) {    //quadrant 4
                     if (slope <= -1) {
-                        powerChaser.inertiaX = -powerChaser.speed * (slope/(slope * slope));
+                        powerChaser.inertiaX = -powerChaser.speed * (slope / (slope * slope));
                         powerChaser.inertiaY = -powerChaser.speed;
                     } else if (slope > -1 && slope < 0) {
                         powerChaser.inertiaX = powerChaser.speed;
@@ -900,28 +921,28 @@ let Cell_Division = {
                 powerChaser.powerY = powerChaser.powerY + powerChaser.inertiaY;
             }
         } else {
-            if (powerChaser.powerX > 1268 + powerChaser.mass/2) {
+            if (powerChaser.powerX > 1268 + powerChaser.mass / 2) {
                 powerChaser.powerX = powerChaser.powerX + Math.random() * 2 - 1;
                 powerChaser.powerY = powerChaser.powerY + Math.random() * 2 - 1;
             } else {
                 powerChaser.powerX = powerChaser.powerX + 2;
                 powerChaser.powerY = powerChaser.powerY + Math.random() * 2 - 1;
             }
-            if (powerChaser.powerY < 437 - powerChaser.mass/2 + 12.5) {
+            if (powerChaser.powerY < 437 - powerChaser.mass / 2 + 12.5) {
                 powerChaser.powerX = powerChaser.powerX + Math.random() * 2 - 1;
                 powerChaser.powerY = powerChaser.powerY + Math.random() * 2 - 1;
             } else {
                 powerChaser.powerX = powerChaser.powerX + Math.random() * 2 - 1;
-                powerChaser.powerY = powerChaser.powerY -2;
+                powerChaser.powerY = powerChaser.powerY - 2;
             }
-            if (powerChaser.powerX < 1470 - powerChaser.mass/2) {
+            if (powerChaser.powerX < 1470 - powerChaser.mass / 2) {
                 powerChaser.powerX = powerChaser.powerX + Math.random() * 2 - 1;
                 powerChaser.powerY = powerChaser.powerY + Math.random() * 2 - 1;
             } else {
-                powerChaser.powerX = powerChaser.powerX -2;
+                powerChaser.powerX = powerChaser.powerX - 2;
                 powerChaser.powerY = powerChaser.powerY + Math.random() * 2 - 1;
             }
-            if (powerChaser.powerY > 234 + powerChaser.mass/2) {
+            if (powerChaser.powerY > 234 + powerChaser.mass / 2) {
                 powerChaser.powerX = powerChaser.powerX + Math.random() * 2 - 1;
                 powerChaser.powerY = powerChaser.powerY + Math.random() * 2 - 1;
             } else {
@@ -951,28 +972,28 @@ let Cell_Division = {
             powerBouncer.powerX = powerBouncer.powerX + powerBouncer.inertiaX;
             powerBouncer.powerY = powerBouncer.powerY + powerBouncer.inertiaY;
         } else {
-            if (powerBouncer.powerX > 1268 + powerBouncer.mass/2) {
+            if (powerBouncer.powerX > 1268 + powerBouncer.mass / 2) {
                 powerBouncer.powerX = powerBouncer.powerX + Math.random() * 2 - 1;
                 powerBouncer.powerY = powerBouncer.powerY + Math.random() * 2 - 1;
             } else {
                 powerBouncer.powerX = powerBouncer.powerX + 2;
                 powerBouncer.powerY = powerBouncer.powerY + Math.random() * 2 - 1;
             }
-            if (powerBouncer.powerY < 670 - powerBouncer.mass/2) {
+            if (powerBouncer.powerY < 670 - powerBouncer.mass / 2) {
                 powerBouncer.powerX = powerBouncer.powerX + Math.random() * 2 - 1;
                 powerBouncer.powerY = powerBouncer.powerY + Math.random() * 2 - 1;
             } else {
                 powerBouncer.powerX = powerBouncer.powerX + Math.random() * 2 - 1;
-                powerBouncer.powerY = powerBouncer.powerY -2;
+                powerBouncer.powerY = powerBouncer.powerY - 2;
             }
-            if (powerBouncer.powerX < 1470 - powerBouncer.mass/2) {
+            if (powerBouncer.powerX < 1470 - powerBouncer.mass / 2) {
                 powerBouncer.powerX = powerBouncer.powerX + Math.random() * 2 - 1;
                 powerBouncer.powerY = powerBouncer.powerY + Math.random() * 2 - 1;
             } else {
-                powerBouncer.powerX = powerBouncer.powerX -2;
+                powerBouncer.powerX = powerBouncer.powerX - 2;
                 powerBouncer.powerY = powerBouncer.powerY + Math.random() * 2 - 1;
             }
-            if (powerBouncer.powerY > 467 + powerBouncer.mass/2) {
+            if (powerBouncer.powerY > 467 + powerBouncer.mass / 2) {
                 powerBouncer.powerX = powerBouncer.powerX + Math.random() * 2 - 1;
                 powerBouncer.powerY = powerBouncer.powerY + Math.random() * 2 - 1;
             } else {
