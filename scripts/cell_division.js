@@ -537,7 +537,7 @@ let Cell_Division = {
         }
     },
 
-    collision: function () {
+    collision: function () {     //Though the code for collision was heavily modified by us, we got the base collision algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
 
         //WANDERERS
         for (let i = 0; i < this.wanderers.length; i++) {
@@ -851,6 +851,7 @@ let Cell_Division = {
 
     },
 
+    //Wanderer Boss
     firstPowerMove: function () {
         let powerWanderer = this.powers[0];
         if (this.player.mass >= 35) {
@@ -920,6 +921,7 @@ let Cell_Division = {
         }
     },
 
+    //Chaser Boss
     secondPowerMove: function () {
         let powerChaser = this.powers[1];
         if (this.player.mass >= 85) {
@@ -1022,6 +1024,7 @@ let Cell_Division = {
         }
     },
 
+    //Bouncer Boss
     thirdPowerMove: function () {
         let powerBouncer = this.powers[2];
         if (this.player.mass >= 135) {
@@ -1294,4 +1297,4 @@ let Cell_Division = {
 
 }
 
-Cell_Division.init();
+Cell_Division.init();     //Perfectly 1,300 lines. I wouldn't have it any other way.
