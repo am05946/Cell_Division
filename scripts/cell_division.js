@@ -656,8 +656,8 @@ let Cell_Division = {
                 }
             }
         }
-        //I (Zander) would've put the code that made the cells bounce on the walls here, but for some reason they didn't
-        //work unless they were inside their movement code. My guess is that it has to with the amount of calculations at
+        //I (Zander) would've put the code that made the cells bounce on the walls here, but for some reason they didn't...
+        //work unless they were inside their movement code. My guess is that it has to do with the amount of calculations at...
         //the same time that went on inside the collision function at the time offset it for some reason.
     },
 
