@@ -379,7 +379,7 @@ let Cell_Division = {
                 this.player.element.style.border = "rgba(0, 0, 0, 0)";
                 this.deathscreen.style.backgroundColor = "rgba(155, 0, 0, 0.5)";
                 let playerObj = document.getElementById("player");
-                playerObj.remove;    //I (Zander) have tried to get this to work for several hours for the past few days, and yet, I cannot figure out how to
+                playerObj.remove;    //I (------) have tried to get this to work for several hours for the past few days, and yet, I cannot figure out how to
                 //delete a div. Unfortunately because of this, I will not be able to make a restart button, and those little viruses in the back will have
                 //to remain. Thankfully, there is that old motto, and those un-removable viruses in the back have just become a feature.
                 //Oh yea, and the only reason I'm using this still is cause it doesn't give me an error message, though I do think I got pretty close with:
@@ -656,7 +656,7 @@ let Cell_Division = {
                 }
             }
         }
-        //I (Zander) would've put the code that made the cells bounce on the walls here, but for some reason they didn't...
+        //I (------) would've put the code that made the cells bounce on the walls here, but for some reason they didn't...
         //work unless they were inside their movement code. My guess is that it has to do with the amount of calculations at...
         //the same time that went on inside the collision function at the time offset it for some reason.
     },
